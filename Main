@@ -10,25 +10,20 @@ def onAppStart(app):
     app.boardHeight = 300
     app.boxWidth = app.boardWidth/app.cols
     app.boxHeight = app.boardHeight/app.rows
-    app.mouseX = 0 
-    app.mouseY = 0 
     
-    app.cellBorderWidth = 2
-    app.pressKey = False
-    app.currNumList = [[None] * app.cols for row in range(app.rows)]
+    app.cellThickWidth = 2
+    app.cellBorderWidth = 1
     
     app.board = [[None] * app.cols for row in range(app.rows)]
     app.selection = None
+    app.number = None
 
 def onMousePress(app, mouseX, mouseY):
-    app.mouseX = mouseX
-    app.mouseY = mouseY 
     app.selection = None
     cell = getCell(app, mouseX, mouseY)
     if cell != None:
         row, col = cell
-        if app.board[row][col] == None:
-            app.pressKey = True
+        app.number = cell
             
 def onMouseMove(app, mouseX, mouseY):
     selectedCell = getCell(app, mouseX, mouseY)
@@ -36,44 +31,53 @@ def onMouseMove(app, mouseX, mouseY):
         app.selection = None
     else:
         row, col = selectedCell
-        if app.board[row][col] == None:
-            app.selection = selectedCell
-        else:
-            app.selection = None
+        app.selection = selectedCell
     
 def onKeyPress(app, key):
-    app.pressKey = True
-    if key.isdigit():
-        app.currNumList.append(key)
-    
+    if app.number != None:
+        row, col = app.number
+        if key.isdigit():
+            app.board[row][col] = key
             
 def redrawAll(app):
     drawBoard(app)
     drawBoardBorder(app)
-    for num in app.currNumList:
-        if num != None:
-            cx, cy = getCell(app, app.mouseX, app.mouseY)
-            drawLabel(f'{app.currNum}', 
-                        (app.boardLeft*(1+cx) + app.boxWidth)/2 , 
-                        (app.boardTop*(1+cy) + app.boxHeight)/2)
+    # drawLines(app)
     
 def drawBoard(app):
     for row in range(app.rows):
         for col in range(app.cols):
             drawCell(app, row, col)
+            if app.board[row][col] != None:
+                drawLabel(app.board[row][col], 
+                            app.boardLeft + (app.boxWidth*col)+app.boxWidth/2, 
+                            app.boardTop + (app.boxHeight*row)+app.boxHeight/2)
             
 def drawBoardBorder(app):
     drawRect(app.boardLeft, app.boardTop, app.boardWidth, app.boardHeight,
             fill = None, border = 'black', 
             borderWidth = 2 * app.cellBorderWidth)
             
+            
 def drawCell(app, row, col):
     cellLeft, cellTop = getCellLeftTop(app, row, col)
     cellWidth, cellHeight = getCellSize(app)
     color = 'cyan' if (row, col) == app.selection else None
+        
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
             fill = color, border = 'black',
             borderWidth = app.cellBorderWidth)
+            
+# def drawLines(app):
+#     for i in range(len(app.board)):
+#         if (i+1) % 3 == 0:
+#             drawLine(app.boardLeft, app.boardTop, app.boardWidth - app.boardLeft
+#                         app.boardLeft + (i+1) * app.boxHeight, app.boardTop, 
+#                     lineWidth = 2)
+#     # for j in range(len(app.board[0])):
+#     #     if (j+1) % 3 == 0:
+#     #         drawLine(app.boardLeft, app.boardTop + j * app.boxHeight,
+#     #                 lineWidth = 2)
 
 def getCell(app, x, y):
     dx = x - app.boardLeft
@@ -93,6 +97,8 @@ def getCellLeftTop(app, row, col):
     return (cellLeft, cellTop)
     
 def getCellSize(app):
+    
+    
     cellWidth = app.boardWidth / app.cols
     cellHeight = app.boardHeight / app.rows
     return (cellWidth, cellHeight)
