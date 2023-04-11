@@ -10,8 +10,7 @@ def onAppStart(app):
     app.boardHeight = 300
     app.boxWidth = app.boardWidth/app.cols
     app.boxHeight = app.boardHeight/app.rows
-    
-    app.cellThickWidth = 2
+
     app.cellBorderWidth = 1
     
     app.board = [[None] * app.cols for row in range(app.rows)]
@@ -42,7 +41,7 @@ def onKeyPress(app, key):
 def redrawAll(app):
     drawBoard(app)
     drawBoardBorder(app)
-    # drawLines(app)
+    drawLines(app)
     
 def drawBoard(app):
     for row in range(app.rows):
@@ -51,33 +50,42 @@ def drawBoard(app):
             if app.board[row][col] != None:
                 drawLabel(app.board[row][col], 
                             app.boardLeft + (app.boxWidth*col)+app.boxWidth/2, 
-                            app.boardTop + (app.boxHeight*row)+app.boxHeight/2)
+                            app.boardTop + (app.boxHeight*row)+app.boxHeight/2,
+                                size = 16)
             
 def drawBoardBorder(app):
     drawRect(app.boardLeft, app.boardTop, app.boardWidth, app.boardHeight,
             fill = None, border = 'black', 
-            borderWidth = 2 * app.cellBorderWidth)
-            
+            borderWidth = 4 * app.cellBorderWidth)
             
 def drawCell(app, row, col):
     cellLeft, cellTop = getCellLeftTop(app, row, col)
     cellWidth, cellHeight = getCellSize(app)
-    color = 'cyan' if (row, col) == app.selection else None
+    
+    if (row, col) == app.selection:
+        color = 'pink'
+    elif (row, col) == app.number:
+        color = 'red'
+    else:
+        color = None
         
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
             fill = color, border = 'black',
             borderWidth = app.cellBorderWidth)
             
-# def drawLines(app):
-#     for i in range(len(app.board)):
-#         if (i+1) % 3 == 0:
-#             drawLine(app.boardLeft, app.boardTop, app.boardWidth - app.boardLeft
-#                         app.boardLeft + (i+1) * app.boxHeight, app.boardTop, 
-#                     lineWidth = 2)
-#     # for j in range(len(app.board[0])):
-#     #     if (j+1) % 3 == 0:
-#     #         drawLine(app.boardLeft, app.boardTop + j * app.boxHeight,
-#     #                 lineWidth = 2)
+def drawLines(app):
+    for i in range(len(app.board)):
+        if (i+1) % 3 == 0 and i != 8:
+            drawLine(app.boardLeft, app.boardTop + (i+1) * app.boxWidth, 
+                        app.boardLeft + app.boardWidth,
+                        app.boardTop + (i+1) * app.boxWidth,
+                        lineWidth = 4 * app.cellBorderWidth)
+    for j in range(len(app.board[0])):
+        if (j+1) % 3 == 0 and j != 8:
+            drawLine(app.boardLeft + (j+1) * app.boxHeight, app.boardTop, 
+                        app.boardLeft + (j+1) * app.boxHeight,
+                        app.boardTop + app.boardHeight, 
+                        lineWidth = 4 * app.cellBorderWidth)
 
 def getCell(app, x, y):
     dx = x - app.boardLeft
@@ -97,8 +105,6 @@ def getCellLeftTop(app, row, col):
     return (cellLeft, cellTop)
     
 def getCellSize(app):
-    
-    
     cellWidth = app.boardWidth / app.cols
     cellHeight = app.boardHeight / app.rows
     return (cellWidth, cellHeight)
