@@ -1,6 +1,8 @@
 from cmu_graphics import *
 import math
 
+#ask about the mutiple files demo???
+
 def onAppStart(app):
     app.rows = 9
     app.cols = 9
