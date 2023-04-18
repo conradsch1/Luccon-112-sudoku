@@ -1,6 +1,7 @@
 from cmu_graphics import *
 import math
 import os
+import random
 
 ##################
 # play screen
@@ -15,10 +16,10 @@ def play_onScreenStart(app):
     app.boardHeight = 300
     app.boxWidth = app.boardWidth/app.cols
     app.boxHeight = app.boardHeight/app.rows
+    app.board = []
 
     app.cellBorderWidth = 1
-    
-    app.board = [[None] * app.cols for row in range(app.rows)]
+
     app.selection = None
     app.number = None
     difficulty = app.getTextInput('''What diffuculty do you want? Opintions:
@@ -28,9 +29,17 @@ def play_onScreenStart(app):
     print(boardPath)
     play_intializeBoard(app, boardPath)
 
-def play_intializeBoard(app, boardPath):
-    pass
+def play_readFile(path):
+    with open(path, "rt") as f:
+        return f.read()
 
+def play_intializeBoard(app, boardPath):
+    contents = play_readFile(boardPath)
+    for line in contents.splitlines():
+        rowList = []
+        for cell in line.split(' '):
+            rowList.append(cell)
+        app.board.append(rowList)
 
 def play_onMousePress(app, mouseX, mouseY):
     app.selection = None
@@ -128,10 +137,10 @@ def play_getCellSize(app):
 
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'boards/'):
+    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'boards/{filename}')
+                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
@@ -142,7 +151,6 @@ def play_hasFilters(filename, filters=None):
     return True
 
 def play_loadRandomBoard(filters=None):
-    
     boardPathsList = play_loadBoardPaths(filters)
     board = random.choice(boardPathsList)
     return board
