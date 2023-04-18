@@ -1,9 +1,12 @@
 from cmu_graphics import *
 import math
+import os
 
-#ask about the mutiple files demo???
+##################
+# play screen
+###################
 
-def onAppStart(app):
+def play_onScreenStart(app):
     app.rows = 9
     app.cols = 9
     app.boardLeft = 50
@@ -18,51 +21,61 @@ def onAppStart(app):
     app.board = [[None] * app.cols for row in range(app.rows)]
     app.selection = None
     app.number = None
+    difficulty = app.getTextInput('''What diffuculty do you want? Opintions:
+                                     easy, medium, hard, expert, evil''')
+    if difficulty == '': difficulty = None
+    boardPath = play_loadRandomBoard(difficulty)
+    print(boardPath)
+    play_intializeBoard(app, boardPath)
 
-def onMousePress(app, mouseX, mouseY):
+def play_intializeBoard(app, boardPath):
+    pass
+
+
+def play_onMousePress(app, mouseX, mouseY):
     app.selection = None
-    cell = getCell(app, mouseX, mouseY)
+    cell = play_getCell(app, mouseX, mouseY)
     if cell != None:
         row, col = cell
         app.number = cell
             
-def onMouseMove(app, mouseX, mouseY):
-    selectedCell = getCell(app, mouseX, mouseY)
+def play_onMouseMove(app, mouseX, mouseY):
+    selectedCell = play_getCell(app, mouseX, mouseY)
     if selectedCell == None:
         app.selection = None
     else:
         row, col = selectedCell
         app.selection = selectedCell
     
-def onKeyPress(app, key):
+def play_onKeyPress(app, key):
     if app.number != None:
         row, col = app.number
         if key.isdigit():
             app.board[row][col] = key
             
-def redrawAll(app):
-    drawBoard(app)
-    drawBoardBorder(app)
-    drawLines(app)
+def play_redrawAll(app):
+    play_drawBoard(app)
+    play_drawBoardBorder(app)
+    play_drawLines(app)
     
-def drawBoard(app):
+def play_drawBoard(app):
     for row in range(app.rows):
         for col in range(app.cols):
-            drawCell(app, row, col)
+            play_drawCell(app, row, col)
             if app.board[row][col] != None:
                 drawLabel(app.board[row][col], 
                             app.boardLeft + (app.boxWidth*col)+app.boxWidth/2, 
                             app.boardTop + (app.boxHeight*row)+app.boxHeight/2,
                                 size = 16)
             
-def drawBoardBorder(app):
+def play_drawBoardBorder(app):
     drawRect(app.boardLeft, app.boardTop, app.boardWidth, app.boardHeight,
             fill = None, border = 'black', 
             borderWidth = 4 * app.cellBorderWidth)
             
-def drawCell(app, row, col):
-    cellLeft, cellTop = getCellLeftTop(app, row, col)
-    cellWidth, cellHeight = getCellSize(app)
+def play_drawCell(app, row, col):
+    cellLeft, cellTop = play_getCellLeftTop(app, row, col)
+    cellWidth, cellHeight = play_getCellSize(app)
     
     if (row, col) == app.selection:
         color = 'pink'
@@ -75,13 +88,15 @@ def drawCell(app, row, col):
             fill = color, border = 'black',
             borderWidth = app.cellBorderWidth)
             
-def drawLines(app):
+def play_drawLines(app):
+    #draw horizontal lines?
     for i in range(len(app.board)):
         if (i+1) % 3 == 0 and i != 8:
             drawLine(app.boardLeft, app.boardTop + (i+1) * app.boxWidth, 
                         app.boardLeft + app.boardWidth,
                         app.boardTop + (i+1) * app.boxWidth,
                         lineWidth = 4 * app.cellBorderWidth)
+    #draw vertical lines
     for j in range(len(app.board[0])):
         if (j+1) % 3 == 0 and j != 8:
             drawLine(app.boardLeft + (j+1) * app.boxHeight, app.boardTop, 
@@ -89,10 +104,10 @@ def drawLines(app):
                         app.boardTop + app.boardHeight, 
                         lineWidth = 4 * app.cellBorderWidth)
 
-def getCell(app, x, y):
+def play_getCell(app, x, y):
     dx = x - app.boardLeft
     dy = y - app.boardTop
-    cellWidth, cellHeight = getCellSize(app)
+    cellWidth, cellHeight = play_getCellSize(app)
     row = math.floor(dy / cellHeight)
     col = math.floor(dx / cellWidth)
     if (0 <= row < app.rows) and (0 <= col < app.cols):
@@ -100,18 +115,80 @@ def getCell(app, x, y):
     else:
         return None
         
-def getCellLeftTop(app, row, col):
-    cellWidth, cellHeight = getCellSize(app)
+def play_getCellLeftTop(app, row, col):
+    cellWidth, cellHeight = play_getCellSize(app)
     cellLeft = app.boardLeft + col * cellWidth
     cellTop = app.boardTop + row * cellHeight
     return (cellLeft, cellTop)
     
-def getCellSize(app):
+def play_getCellSize(app):
     cellWidth = app.boardWidth / app.cols
     cellHeight = app.boardHeight / app.rows
     return (cellWidth, cellHeight)
+
+def play_loadBoardPaths(filters):
+    boardPaths = [ ]
+    for filename in os.listdir(f'boards/'):
+        if filename.endswith('.txt'):
+            if play_hasFilters(filename, filters):
+                boardPaths.append(f'boards/{filename}')
+    return boardPaths
+
+def play_hasFilters(filename, filters=None):
+    if filters == None: return True
+    for filter in filters:
+        if filter not in filename:
+            return False
+    return True
+
+def play_loadRandomBoard(filters=None):
     
+    boardPathsList = play_loadBoardPaths(filters)
+    board = random.choice(boardPathsList)
+    return board
+
+##################
+#splash screen
+##################
+def splash_onAppStart(app):
+    app.color = 'hotPink'
+
+def splash_onScreenStart(app):
+    app.color = 'hotPink'
+
+def splash_redrawAll(app):
+    drawRect(0, 0, 400, 400, fill = 'pink')
+    drawLine(20, 20, 380, 20, lineWidth = 3, fill = app.color)
+    drawLine(40, 40, 360, 40, lineWidth = 3, dashes = True)
+    drawLine(20, 20, 20, 380, lineWidth = 3, fill = app.color)
+    drawLine(40, 40, 40, 360, lineWidth = 3, dashes = True)
+    drawLine(20, 380, 380, 380, lineWidth = 3, fill = app.color)
+    drawLine(40, 360, 360, 360, lineWidth = 3, dashes = True)
+    drawLine(380, 20, 380, 380, lineWidth = 3, fill = app.color)
+    drawLine(360, 40, 360, 360, lineWidth = 3, dashes = True)
+    drawCircle(20, 20, 5, fill = app.color)
+    drawCircle(380, 20, 5, fill = app.color)
+    drawCircle(20, 380, 5, fill = app.color)
+    drawCircle(380, 380, 5, fill = app.color)
+    drawLabel('Sudoku', 200, 160, bold = True, size = 60)
+    drawLabel("Let's play", 200, 100, bold = True, size = 20)
+
+def splash_onKeyPress(app, key):
+    #add direction to splash screen
+    if key == 'p':
+        play_onScreenStart(app)
+        setActiveScreen('play')
+        
+
+#######################
+#help screen
+#######################
+def help_onKeyPress(app, key):
+    # add to screen
+    if key == 'p':
+        setActiveScreen('help')
+
 def main():
-    runApp()
+    runAppWithScreens(initialScreen='splash')
     
 main()
