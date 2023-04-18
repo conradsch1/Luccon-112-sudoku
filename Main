@@ -17,6 +17,7 @@ def play_onScreenStart(app):
     app.boxWidth = app.boardWidth/app.cols
     app.boxHeight = app.boardHeight/app.rows
     app.board = []
+    app.intialBoard = None
 
     app.cellBorderWidth = 1
 
@@ -40,6 +41,7 @@ def play_intializeBoard(app, boardPath):
         for cell in line.split(' '):
             rowList.append(cell)
         app.board.append(rowList)
+    app.intialBoard = app.board
 
 def play_onMousePress(app, mouseX, mouseY):
     app.selection = None
@@ -61,6 +63,9 @@ def play_onKeyPress(app, key):
         row, col = app.number
         if key.isdigit():
             app.board[row][col] = key
+    #add to dirrections
+    elif key == 'h':
+        setActiveScreen('help')
             
 def play_redrawAll(app):
     play_drawBoard(app)
@@ -81,18 +86,49 @@ def play_drawBoardBorder(app):
     drawRect(app.boardLeft, app.boardTop, app.boardWidth, app.boardHeight,
             fill = None, border = 'black', 
             borderWidth = 4 * app.cellBorderWidth)
+
+#####
+# printing debugging   
+####
+def repr2dList(L):
+    if (L == []): return '[]'
+    output = [ ]
+    rows = len(L)
+    cols = max([len(L[row]) for row in range(rows)])
+    M = [['']*cols for row in range(rows)]
+    for row in range(rows):
+        for col in range(len(L[row])):
+            M[row][col] = repr(L[row][col])
+    colWidths = [0] * cols
+    for col in range(cols):
+        colWidths[col] = max([len(M[row][col]) for row in range(rows)])
+    output.append('[\n')
+    for row in range(rows):
+        output.append(' [ ')
+        for col in range(cols):
+            if (col > 0):
+                output.append(', ' if col < len(L[row]) else '  ')
+            output.append(M[row][col].rjust(colWidths[col]))
+        output.append((' ],' if row < rows-1 else ' ]') + '\n')
+    output.append(']')
+    return ''.join(output)
+
+def print2dList(L):
+    print(repr2dList(L))
             
 def play_drawCell(app, row, col):
     cellLeft, cellTop = play_getCellLeftTop(app, row, col)
     cellWidth, cellHeight = play_getCellSize(app)
-    
+    #print2dList(app.intialBoard )
+    if app.intialBoard[row][col] != '0':
+        color = 'mistyRose'
+    else:
+        color = None
     if (row, col) == app.selection:
         color = 'pink'
     elif (row, col) == app.number:
         color = 'red'
-    else:
-        color = None
-        
+    
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
             fill = color, border = 'black',
             borderWidth = app.cellBorderWidth)
@@ -186,6 +222,8 @@ def splash_onKeyPress(app, key):
     if key == 'p':
         play_onScreenStart(app)
         setActiveScreen('play')
+    elif key == 'h':
+        setActiveScreen('help')
         
 
 #######################
