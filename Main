@@ -3,6 +3,67 @@ import math
 import os
 import random
 
+def rowRegion(board):
+    rows, cols = len(board), len(board[0])
+    rowList = []
+    eachRow = []
+    for row in range(rows):
+        for col in range(cols):
+            eachRow.append((row, col))
+        rowList.append(eachRow)
+        eachRow = []
+        print(rowList)
+
+def colRegion(board):
+    rows, cols = len(board), len(board[0])
+    colList = []
+    eachCol = []
+    for col in range(cols):
+        for row in range(rows):
+            eachCol.append((row, col))
+        colList.append(eachCol)
+        eachCol = []
+
+def blockRegion(board):
+    rows, cols = len(board), len(board[0])
+    
+
+class State:
+    def __init__(self, board, legals, row, col, block):
+        self.board = board
+        self.legals = legals
+        self.row = row
+        self.col = col
+        self.block = block
+
+    def getRowRegion(self, row):
+        rows, cols = len(self.board), len(self.board[0])
+        for i in range(rows):
+            if i == self.row:
+                return i
+
+    def getColRegion(self, col):
+        rows, cols = len(self.board), len(self.board[0])
+        for i in range(rows):
+            for j in range(cols):
+                if j == self.col:
+                    return j
+
+    def getBlock(self, row, col):
+        rows, cols = len(self.board), len(self.board[0])
+        rowIndex = None
+        colIndex = None
+        for i in range(rows):
+            for j in range(cols):
+                if i == self.row and j == self.col:
+                    rowIndex = i
+                    colIndex = j
+    
+
+        
+
+
+
 ##################
 # play screen
 ###################
@@ -23,9 +84,10 @@ def play_onScreenStart(app):
 
     app.selection = None
     app.number = None
-    difficulty = app.getTextInput('''What diffuculty do you want? Opintions:
+    difficulty = app.getTextInput('''What difficulty do you want? Options:
                                      easy, medium, hard, expert, evil''')
-    if difficulty == '': difficulty = None
+    if difficulty == '': 
+        difficulty = None
     boardPath = play_loadRandomBoard(difficulty)
     print(boardPath)
     play_intializeBoard(app, boardPath)
@@ -66,6 +128,8 @@ def play_onKeyPress(app, key):
     #add to dirrections
     elif key == 'h':
         setActiveScreen('help')
+    elif key == 's':
+        setActiveScreen('splash')
             
 def play_redrawAll(app):
     play_drawBoard(app)
@@ -119,7 +183,7 @@ def print2dList(L):
 def play_drawCell(app, row, col):
     cellLeft, cellTop = play_getCellLeftTop(app, row, col)
     cellWidth, cellHeight = play_getCellSize(app)
-    #print2dList(app.intialBoard )
+    #print2dList(app.initialBoard)
     if app.intialBoard[row][col] != '0':
         color = 'mistyRose'
     else:
@@ -134,7 +198,7 @@ def play_drawCell(app, row, col):
             borderWidth = app.cellBorderWidth)
             
 def play_drawLines(app):
-    #draw horizontal lines?
+    #draw horizontal lines
     for i in range(len(app.board)):
         if (i+1) % 3 == 0 and i != 8:
             drawLine(app.boardLeft, app.boardTop + (i+1) * app.boxWidth, 
@@ -173,14 +237,15 @@ def play_getCellSize(app):
 
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
+    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
+                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
-    if filters == None: return True
+    if filters == None: 
+        return True
     for filter in filters:
         if filter not in filename:
             return False
@@ -197,9 +262,6 @@ def play_loadRandomBoard(filters=None):
 def splash_onAppStart(app):
     app.color = 'hotPink'
 
-def splash_onScreenStart(app):
-    app.color = 'hotPink'
-
 def splash_redrawAll(app):
     drawRect(0, 0, 400, 400, fill = 'pink')
     drawLine(20, 20, 380, 20, lineWidth = 3, fill = app.color)
@@ -214,8 +276,14 @@ def splash_redrawAll(app):
     drawCircle(380, 20, 5, fill = app.color)
     drawCircle(20, 380, 5, fill = app.color)
     drawCircle(380, 380, 5, fill = app.color)
-    drawLabel('Sudoku', 200, 160, bold = True, size = 60)
-    drawLabel("Let's play", 200, 100, bold = True, size = 20)
+
+    drawLabel('Sudoku', 200, 160, bold = True, size = 75, fill = 'black')
+    drawLabel('Sudoku', 200, 160, bold = True, size = 67.5, fill = 'hotPink')
+    drawLabel('Sudoku', 200, 160, bold = True, size = 60, fill = 'white')
+    drawLabel("Let's play", 200, 100, bold = True, size = 30)
+    drawLabel("Press 'p' to start playing Sudoku", 200, 230, size = 18, bold = True, fill = 'hotPink')
+    drawLabel("Press 'h' for instructions", 200, 260, size = 18, bold = True, fill = 'white')
+    drawLabel('HAVE FUN', 200, 310, size = 40, bold = True, fill = 'hotPink')
 
 def splash_onKeyPress(app, key):
     #add direction to splash screen
@@ -229,12 +297,34 @@ def splash_onKeyPress(app, key):
 #######################
 #help screen
 #######################
+def help_onScreenStart(app):
+    app.color = 'lightPink'
+
 def help_onKeyPress(app, key):
     # add to screen
     if key == 'p':
         setActiveScreen('help')
 
+def help_redrawAll(app):
+    drawRect(0, 0, 400, 400, fill = app.color)
+    drawRect(6, 6, 388, 388, fill = None, border = 'black', borderWidth = 6)
+    drawRect(120, 30, 160, 40, fill = 'lightPink')
+    drawRect(120, 30, 160, 40, fill = None, border = 'black')
+    drawLabel('Instructions', 200, 50, bold = True, size = 20)
+    drawLabel("Notice how there exists 3 'regions':", 200, 110, size = 16, bold = True)
+    drawLabel(' - 9 rows (horizontal)', 200, 140, size = 16, bold = True)
+    drawLabel(' - 9 columns (vertical)', 200, 160, size = 16, bold = True)
+    drawLabel(' - 9 regions (denoted by the bolded blocks)', 200, 180, size = 16, bold = True)
+    drawLine(65, 120, 335, 120)
+    drawLabel('Each region must contain digits 1-9 exactly once', 200, 220, size = 16, bold = True, fill = 'white')  
+    drawLabel("Hint: Each cell displays numbers called 'legals'", 200, 250, size = 16, bold = True)
+    drawLabel(' * legals are numbers that can occupy that cell', 200, 270, size = 16, bold = True)  
+    drawLabel('Use logic to determine which numbers go where!', 200, 300, size = 16, bold = True, fill = 'white')
+    drawLabel('GOOD LUCK', 200, 340, size = 20, bold = True)
+    drawLabel('HAVE FUN', 200, 360, size = 20, bold = True)
+
 def main():
     runAppWithScreens(initialScreen='splash')
+    rowRegion()
     
 main()
