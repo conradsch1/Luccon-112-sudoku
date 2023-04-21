@@ -2,6 +2,112 @@ from cmu_graphics import *
 import math
 import os
 import random
+import copy
+
+######
+#make Allregions list
+#####
+def createAllRegions(rows, cols):
+    rowRegions = createAllRowsRegions(rows, cols)
+    colRegions = createAllColRegions(rows, cols)
+    blockRegions = createAllBlockRegions(rows)
+    return [rowRegions, colRegions, blockRegions]
+
+def createAllRowsRegions(rows, cols):
+    rowRegions = []
+    for row in range(rows):
+        rowList = [(row, col) for col in range(cols)]
+        rowRegions.append(rowList)
+    return rowRegions
+
+def createAllColRegions(rows, cols):
+    colRegions = []
+    for col in range(cols):
+        colList = [(row, col) for row in range(rows)]
+        colRegions.append(colList)
+    return colRegions
+
+#used isLegal sedoku code
+def createAllBlockRegions(rows):
+    blockRegions = []
+    numberOfBlocks = rows
+    blockSize = pythonRound((rows) ** 0.5)
+    for block in range(numberOfBlocks):
+        blockList = createBlockList(block, blockSize)
+        blockRegions.append(blockList)
+    return blockRegions
+        
+def createBlockList(block, blockSize):
+    startingRow = block // blockSize * blockSize
+    startingCol = block % blockSize * blockSize
+    blockList = []
+    for drow in range(blockSize):
+        for dcol in range(blockSize):
+            (row, col) = startingRow + drow, startingCol + dcol
+            blockList.append((row,col))
+    return blockList
+
+#global variabe list of All regions [rowRegions, ColRegions, BlockRegions]
+regions = createAllRegions(9, 9)
+
+######
+######
+
+#make intial legals when make intial board and unchanged legals. Then add make new until have intial board. then clear state list
+
+class State():
+    def __init__(self, board, legals):
+        self.board = board
+        self.legals = legals
+
+    @staticmethod
+    def getRowRegion(row):
+        return regions[0][row]
+
+    @staticmethod
+    def getColRegion(col):
+        return regions[1][col]
+
+    @staticmethod
+    def getBlockRegion(block):
+        return regions[2][block]
+
+    @staticmethod
+    def getBlock(row, col):
+        rows = len(regions[0][0])
+        blockSize = pythonRound((rows) ** 0.5)
+        return ((row // blockSize)) * blockSize + (col//blockSize)
+
+    @staticmethod
+    def getCellRegions(row, col):
+        rowRegion = State.getRowRegion(row)
+        colRegion = State.getColRegion(col)
+        block = State.getBlock(row, col)
+        blockRegion = State.getBlockRegion(block)
+        return (rowRegion, colRegion, blockRegion)
+
+
+    def banLegals(self, row, col, value):
+        cellRegions = State.getCellRegions(row, col)
+    
+    def set(self, row, col, value):
+        nextState = copy.deepcopy(self)
+        nextState.board[row][col] = value
+        banLegals(self, row, col, value)
+        
+
+
+
+
+#################
+
+    def getRowRegion(self, row):
+        rows, cols = len(self.board), len(self.board[0])
+        
+    def getCellRegions(self, row, col):
+        rowRegion = getRowRegion(self, row)
+        colregion = getColRegion(self, col)
+        blockRegion = getBlockRegion(self, row, col)
 
 def rowRegion(board):
     rows, cols = len(board), len(board[0])
@@ -237,10 +343,10 @@ def play_getCellSize(app):
 
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
+    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
+                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
