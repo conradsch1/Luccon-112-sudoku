@@ -1,3 +1,5 @@
+# project partners: Conrad Schaumburg (cschaumb) and Lucy Blazquez (lblazque)
+
 from cmu_graphics import *
 import math
 import os
@@ -53,12 +55,30 @@ regions = createAllRegions(9, 9)
 ######
 ######
 
-#make intial legals when make intial board and unchanged legals. Then add make new until have intial board. then clear state list
+#make initial legals when make initial board and unchanged legals. Then add make new until have initial board. then clear state list
 
 class State():
+    #since I'm making copyies of state classes does init only run on the first. Does it run when I make a copy
     def __init__(self, board, legals):
         self.board = board
         self.legals = legals
+
+    def printBoard(self):
+        print2dList(self.board)
+
+    def printLegals(self):
+            colWidth = 4
+            for col in range(9):
+                colWidth = max(colWidth, 1+max([len(self.legals[row][col]) for row in range(9)]))
+            for row in range(9):
+                for col in range(9):
+                    label = ''.join([str(v) for v in sorted(self.legals[row][col])])
+                    if label == '': label = '-'
+                    print(f"{' '*(colWidth - len(label))}{label}", end='')
+                print()
+
+    def print(self): 
+        self.printBoard(); self.printLegals()
 
     @staticmethod
     def getRowRegion(row):
@@ -87,83 +107,87 @@ class State():
         return (rowRegion, colRegion, blockRegion)
 
 
+    #https://www.geeksforgeeks.org/python-remove-discard-sets/ for .discard()
     def banLegals(self, row, col, value):
+        # mutates self.legals
         cellRegions = State.getCellRegions(row, col)
-    
+        for region in cellRegions:
+            for (row, col) in region:
+                self.legals[row][col].discard(value)
+
     def set(self, row, col, value):
         nextState = copy.deepcopy(self)
         nextState.board[row][col] = value
-        banLegals(self, row, col, value)
-        
-
+        nextState.banLegals(row, col, value)
+        return nextState
 
 
 
 #################
 
-    def getRowRegion(self, row):
-        rows, cols = len(self.board), len(self.board[0])
+#     def getRowRegion(self, row):
+#         rows, cols = len(self.board), len(self.board[0])
         
-    def getCellRegions(self, row, col):
-        rowRegion = getRowRegion(self, row)
-        colregion = getColRegion(self, col)
-        blockRegion = getBlockRegion(self, row, col)
+#     def getCellRegions(self, row, col):
+#         rowRegion = getRowRegion(self, row)
+#         colregion = getColRegion(self, col)
+#         blockRegion = getBlockRegion(self, row, col)
 
-def rowRegion(board):
-    rows, cols = len(board), len(board[0])
-    rowList = []
-    eachRow = []
-    for row in range(rows):
-        for col in range(cols):
-            eachRow.append((row, col))
-        rowList.append(eachRow)
-        eachRow = []
-        print(rowList)
+# def rowRegion(board):
+#     rows, cols = len(board), len(board[0])
+#     rowList = []
+#     eachRow = []
+#     for row in range(rows):
+#         for col in range(cols):
+#             eachRow.append((row, col))
+#         rowList.append(eachRow)
+#         eachRow = []
+#         print(rowList)
 
-def colRegion(board):
-    rows, cols = len(board), len(board[0])
-    colList = []
-    eachCol = []
-    for col in range(cols):
-        for row in range(rows):
-            eachCol.append((row, col))
-        colList.append(eachCol)
-        eachCol = []
+# def colRegion(board):
+#     rows, cols = len(board), len(board[0])
+#     colList = []
+#     eachCol = []
+#     for col in range(cols):
+#         for row in range(rows):
+#             eachCol.append((row, col))
+#         colList.append(eachCol)
+#         eachCol = []
 
-def blockRegion(board):
-    rows, cols = len(board), len(board[0])
+# def blockRegion(board):
+#     rows, cols = len(board), len(board[0])
     
 
-class State:
-    def __init__(self, board, legals, row, col, block):
-        self.board = board
-        self.legals = legals
-        self.row = row
-        self.col = col
-        self.block = block
+# class State:
+#     def __init__(self, board, legals, row, col, block):
+#         self.board = board
+#         self.legals = legals
+#         self.row = row
+#         self.col = col
+#         self.block = block
 
-    def getRowRegion(self, row):
-        rows, cols = len(self.board), len(self.board[0])
-        for i in range(rows):
-            if i == self.row:
-                return i
+#     def getRowRegion(self, row):
+#         rows, cols = len(self.board), len(self.board[0])
+#         for i in range(rows):
+#             if i == self.row:
+#                 return i
 
-    def getColRegion(self, col):
-        rows, cols = len(self.board), len(self.board[0])
-        for i in range(rows):
-            for j in range(cols):
-                if j == self.col:
-                    return j
+#     def getColRegion(self, col):
+#         rows, cols = len(self.board), len(self.board[0])
+#         for i in range(rows)
+#             for j in range(cols):
+#                 if j == self.col:
+#                     return j
 
-    def getBlock(self, row, col):
-        rows, cols = len(self.board), len(self.board[0])
-        rowIndex = None
-        colIndex = None
-        for i in range(rows):
-            for j in range(cols):
-                if i == self.row and j == self.col:
-                    rowIndex = i
-                    colIndex = j
+#     def getBlock(self, row, col):
+#         rows, cols = len(self.board), len(self.board[0])
+#         rowIndex = None
+#         colIndex = None
+#         for i in range(rows):
+#             for j in range(cols):
+#                 if i == self.row and j == self.col:
+#                     rowIndex = i
+#                     colIndex = j
     
 
         
@@ -183,39 +207,71 @@ def play_onScreenStart(app):
     app.boardHeight = 300
     app.boxWidth = app.boardWidth/app.cols
     app.boxHeight = app.boardHeight/app.rows
-    app.board = []
-    app.intialBoard = None
+    app.currentStateIndex = None
+    #app.initialBoard = None
+    app.statesList = []
 
     app.cellBorderWidth = 1
 
     app.selection = None
     app.number = None
+    #steps for making starterStarte/ first state
     difficulty = app.getTextInput('''What difficulty do you want? Options:
                                      easy, medium, hard, expert, evil''')
     if difficulty == '': 
         difficulty = None
     boardPath = play_loadRandomBoard(difficulty)
     print(boardPath)
-    play_intializeBoard(app, boardPath)
+    readBoard = play_readBoard(boardPath)
+    startState = play_makeStarterState(app, readBoard)
+    app.statesList.append(startState)
+    app.currentStateIndex = 0
+
 
 def play_readFile(path):
     with open(path, "rt") as f:
         return f.read()
 
-def play_intializeBoard(app, boardPath):
+def play_makeinitialLegals(app):
+    initialLegals = []
+    for row in range(app.rows):
+        rowList = [set(range(1,10)) for col in range(app.cols)]
+        initialLegals.append(rowList)
+    return initialLegals
+
+def play_makeEmptyState(app):
+    initialBoard = [[None] * app.cols for row in range(app.rows)]
+    initialLegals = play_makeinitialLegals(app)
+    return State(initialBoard, initialLegals)
+
+def play_readBoard(boardPath):
     contents = play_readFile(boardPath)
-    for line in contents.splitlines():
+    readBoard = []
+    for line in contents.splitlines(): 
         rowList = []
-        for cell in line.split(' '):
-            rowList.append(cell)
-        app.board.append(rowList)
-    app.intialBoard = app.board
+        for cellValue in line.split(' '):
+            cellValue = int(cellValue)
+            rowList.append(cellValue)
+        readBoard.append(rowList)
+    print2dList(readBoard)
+    return readBoard
+
+def play_makeStarterState(app, readBoard):
+    initalState = play_makeEmptyState(app)
+    currentState = initalState
+    for row in range(app.rows):
+        for col in range(app.cols):
+            value = readBoard[row][col]
+            nextState = currentState.set(row, col, value)
+            currentState = nextState
+    return currentState
+    
 
 def play_onMousePress(app, mouseX, mouseY):
     app.selection = None
     cell = play_getCell(app, mouseX, mouseY)
     if cell != None:
-        row, col = cell
+        row, col = cell #why this line
         app.number = cell
             
 def play_onMouseMove(app, mouseX, mouseY):
@@ -229,8 +285,23 @@ def play_onMouseMove(app, mouseX, mouseY):
 def play_onKeyPress(app, key):
     if app.number != None:
         row, col = app.number
+        # make so can't enter 0?
         if key.isdigit():
-            app.board[row][col] = key
+            app.statesList = app.statesList[:app.currentStateIndex+1] #remove all the redo boards
+            currentState = app.statesList[app.currentStateIndex]
+            newState = currentState.set(row, col, key)
+            app.statesList.append(newState)
+            app.currentStateIndex += 1
+
+    if key == 'u':
+        app.currentStateIndex -= 1
+        if app.currentStateIndex < 0:
+            app.currentStateIndex = 0
+    elif key == 'r':
+        app.currentStateIndex += 1
+        if app.currentStateIndex >= len(app.statesList):
+            app.currentStateIndex = len(app.statesList) - 1
+
     #add to dirrections
     elif key == 'h':
         setActiveScreen('help')
@@ -246,8 +317,9 @@ def play_drawBoard(app):
     for row in range(app.rows):
         for col in range(app.cols):
             play_drawCell(app, row, col)
-            if app.board[row][col] != None:
-                drawLabel(app.board[row][col], 
+            board = app.statesList[app.currentStateIndex].board
+            if board[row][col] != 0:
+                drawLabel(board[row][col], 
                             app.boardLeft + (app.boxWidth*col)+app.boxWidth/2, 
                             app.boardTop + (app.boxHeight*row)+app.boxHeight/2,
                                 size = 16)
@@ -256,41 +328,12 @@ def play_drawBoardBorder(app):
     drawRect(app.boardLeft, app.boardTop, app.boardWidth, app.boardHeight,
             fill = None, border = 'black', 
             borderWidth = 4 * app.cellBorderWidth)
-
-#####
-# printing debugging   
-####
-def repr2dList(L):
-    if (L == []): return '[]'
-    output = [ ]
-    rows = len(L)
-    cols = max([len(L[row]) for row in range(rows)])
-    M = [['']*cols for row in range(rows)]
-    for row in range(rows):
-        for col in range(len(L[row])):
-            M[row][col] = repr(L[row][col])
-    colWidths = [0] * cols
-    for col in range(cols):
-        colWidths[col] = max([len(M[row][col]) for row in range(rows)])
-    output.append('[\n')
-    for row in range(rows):
-        output.append(' [ ')
-        for col in range(cols):
-            if (col > 0):
-                output.append(', ' if col < len(L[row]) else '  ')
-            output.append(M[row][col].rjust(colWidths[col]))
-        output.append((' ],' if row < rows-1 else ' ]') + '\n')
-    output.append(']')
-    return ''.join(output)
-
-def print2dList(L):
-    print(repr2dList(L))
             
 def play_drawCell(app, row, col):
     cellLeft, cellTop = play_getCellLeftTop(app, row, col)
     cellWidth, cellHeight = play_getCellSize(app)
-    #print2dList(app.initialBoard)
-    if app.intialBoard[row][col] != '0':
+    startBoard = app.statesList[0].board
+    if startBoard[row][col] != 0:
         color = 'mistyRose'
     else:
         color = None
@@ -305,14 +348,14 @@ def play_drawCell(app, row, col):
             
 def play_drawLines(app):
     #draw horizontal lines
-    for i in range(len(app.board)):
+    for i in range(app.rows):
         if (i+1) % 3 == 0 and i != 8:
             drawLine(app.boardLeft, app.boardTop + (i+1) * app.boxWidth, 
                         app.boardLeft + app.boardWidth,
                         app.boardTop + (i+1) * app.boxWidth,
                         lineWidth = 4 * app.cellBorderWidth)
     #draw vertical lines
-    for j in range(len(app.board[0])):
+    for j in range(app.cols):
         if (j+1) % 3 == 0 and j != 8:
             drawLine(app.boardLeft + (j+1) * app.boxHeight, app.boardTop, 
                         app.boardLeft + (j+1) * app.boxHeight,
@@ -429,8 +472,34 @@ def help_redrawAll(app):
     drawLabel('GOOD LUCK', 200, 340, size = 20, bold = True)
     drawLabel('HAVE FUN', 200, 360, size = 20, bold = True)
 
+##state debug printing
+def repr2dList(L):
+    if (L == []): return '[]'
+    output = [ ]
+    rows = len(L)
+    cols = max([len(L[row]) for row in range(rows)])
+    M = [['']*cols for row in range(rows)]
+    for row in range(rows):
+        for col in range(len(L[row])):
+            M[row][col] = repr(L[row][col])
+    colWidths = [0] * cols
+    for col in range(cols):
+        colWidths[col] = max([len(M[row][col]) for row in range(rows)])
+    output.append('[\n')
+    for row in range(rows):
+        output.append(' [ ')
+        for col in range(cols):
+            if (col > 0):
+                output.append(', ' if col < len(L[row]) else '  ')
+            output.append(M[row][col].rjust(colWidths[col]))
+        output.append((' ],' if row < rows-1 else ' ]') + '\n')
+    output.append(']')
+    return ''.join(output)
+
+def print2dList(L):
+    print(repr2dList(L))
+
 def main():
     runAppWithScreens(initialScreen='splash')
-    rowRegion()
     
 main()
