@@ -285,8 +285,7 @@ def play_onMouseMove(app, mouseX, mouseY):
 def play_onKeyPress(app, key):
     if app.number != None:
         row, col = app.number
-        # make so can't enter 0?
-        if key.isdigit():
+        if key.isdigit() and key != '0':
             app.statesList = app.statesList[:app.currentStateIndex+1] #remove all the redo boards
             currentState = app.statesList[app.currentStateIndex]
             newState = currentState.set(row, col, key)
