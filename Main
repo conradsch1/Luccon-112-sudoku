@@ -139,6 +139,7 @@ def play_onScreenStart(app):
     app.currentStateIndex = None
     #app.initialBoard = None
     app.statesList = []
+    app.showLegals = False
 
     app.cellBorderWidth = 1
 
@@ -215,6 +216,20 @@ def play_makeinitialLegals(app):
         initialLegals.append(rowList)
     return initialLegals
 
+def play_drawLegals(app):
+    rows, cols = app.rows, app.cols
+    for row in range(rows):
+        for col in range(cols):
+            drawLabel('1', 50 + row*33 + 9, 50 + col*33 + 9, size = 7)
+            drawLabel('2', 50 + row*33 + 18, 50 + col*33 + 9, size = 7)
+            drawLabel('3', 50 + row*33 + 27, 50 + col*33 + 9, size = 7)
+            drawLabel('4', 50 + row*33 + 9, 50 + col*33 + 18, size = 7)
+            drawLabel('5', 50 + row*33 + 18, 50 + col*33 + 18, size = 7)
+            drawLabel('6', 50 + row*33 + 27, 50 + col*33 + 18, size = 7)
+            drawLabel('7', 50 + row*33 + 9, 50 + col*33 + 27, size = 7)
+            drawLabel('8', 50 + row*33 + 18, 50 + col*33 + 27, size = 7)
+            drawLabel('9', 50 + row*33 + 27, 50 + col*33 + 27, size = 7)
+
 def play_makeEmptyState(app):
     initialBoard = [[None] * app.cols for row in range(app.rows)]
     initialLegals = play_makeinitialLegals(app)
@@ -274,6 +289,9 @@ def play_onKeyPress(app, key):
             app.statesList.append(newState)
             app.currentStateIndex += 1
 
+    if key == 'l':
+        app.showLegals = not app.showLegals
+
     if key == 'u':
         app.currentStateIndex -= 1
         if app.currentStateIndex < 0:
@@ -309,6 +327,8 @@ def play_redrawAll(app):
     play_drawBoard(app)
     play_drawBoardBorder(app)
     play_drawLines(app)
+    if app.showLegals == True:
+        play_drawLegals(app)
     
 def play_drawBoard(app):
     for row in range(app.rows):
@@ -383,10 +403,10 @@ def play_getCellSize(app):
 
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
+    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
+                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
