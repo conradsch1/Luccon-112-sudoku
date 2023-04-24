@@ -241,6 +241,13 @@ def play_makeStarterState(app, readBoard):
             currentState = nextState
     return currentState
     
+def play_getNakedSingle(legals):
+    rows, cols = len(legals), len(legals[0])
+    for row in range(rows):
+        for col in range(cols):
+            cellLegalsLen = len(legals[row][col])
+            if cellLegalsLen == 1:
+                return row, col
 
 def play_onMousePress(app, mouseX, mouseY):
     app.selection = None
@@ -276,7 +283,23 @@ def play_onKeyPress(app, key):
         if app.currentStateIndex >= len(app.statesList):
             app.currentStateIndex = len(app.statesList) - 1
 
-    #add to dirrections
+    elif key == 'q':
+        # weak hint 1
+        currentState = app.statesList[app.currentStateIndex]
+        targetCell = play_getNakedSingle(currentState.legals)
+        #consider the case that targetCell = NOne
+        #DO highlight of targetCell
+    elif key == 'Q':
+        #strong hint 1
+        currentState = app.statesList[app.currentStateIndex]
+        targetCell = play_getNakedSingle(currentState.legals)
+        if targetCell != None:
+            row, col = targetCell
+            value = currentState.legals[row][col].pop()
+            newState = currentState.set(row, col, value)
+            app.statesList.append(newState)
+            app.currentStateIndex += 1
+
     elif key == 'h':
         setActiveScreen('help')
     elif key == 's':
