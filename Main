@@ -111,88 +111,17 @@ class State():
     def banLegals(self, row, col, value):
         # mutates self.legals
         cellRegions = State.getCellRegions(row, col)
-        for region in cellRegions:
-            for (row, col) in region:
-                self.legals[row][col].discard(value)
+        if value != 0: #seting cell to empty doesn't change legas
+            self.legals[row][col] = set() #if a cell is filled it should have no legals
+            for region in cellRegions:
+                for (row, col) in region:
+                    self.legals[row][col].discard(value)
 
     def set(self, row, col, value):
         nextState = copy.deepcopy(self)
         nextState.board[row][col] = value
         nextState.banLegals(row, col, value)
         return nextState
-
-
-
-#################
-
-#     def getRowRegion(self, row):
-#         rows, cols = len(self.board), len(self.board[0])
-        
-#     def getCellRegions(self, row, col):
-#         rowRegion = getRowRegion(self, row)
-#         colregion = getColRegion(self, col)
-#         blockRegion = getBlockRegion(self, row, col)
-
-# def rowRegion(board):
-#     rows, cols = len(board), len(board[0])
-#     rowList = []
-#     eachRow = []
-#     for row in range(rows):
-#         for col in range(cols):
-#             eachRow.append((row, col))
-#         rowList.append(eachRow)
-#         eachRow = []
-#         print(rowList)
-
-# def colRegion(board):
-#     rows, cols = len(board), len(board[0])
-#     colList = []
-#     eachCol = []
-#     for col in range(cols):
-#         for row in range(rows):
-#             eachCol.append((row, col))
-#         colList.append(eachCol)
-#         eachCol = []
-
-# def blockRegion(board):
-#     rows, cols = len(board), len(board[0])
-    
-
-# class State:
-#     def __init__(self, board, legals, row, col, block):
-#         self.board = board
-#         self.legals = legals
-#         self.row = row
-#         self.col = col
-#         self.block = block
-
-#     def getRowRegion(self, row):
-#         rows, cols = len(self.board), len(self.board[0])
-#         for i in range(rows):
-#             if i == self.row:
-#                 return i
-
-#     def getColRegion(self, col):
-#         rows, cols = len(self.board), len(self.board[0])
-#         for i in range(rows)
-#             for j in range(cols):
-#                 if j == self.col:
-#                     return j
-
-#     def getBlock(self, row, col):
-#         rows, cols = len(self.board), len(self.board[0])
-#         rowIndex = None
-#         colIndex = None
-#         for i in range(rows):
-#             for j in range(cols):
-#                 if i == self.row and j == self.col:
-#                     rowIndex = i
-#                     colIndex = j
-    
-
-        
-
-
 
 ##################
 # play screen
@@ -221,12 +150,59 @@ def play_onScreenStart(app):
     if difficulty == '': 
         difficulty = None
     boardPath = play_loadRandomBoard(difficulty)
-    print(boardPath)
+    #print(boardPath)
+    #for testing
+    #boardPath = "C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/easy-01.png.txt"
     readBoard = play_readBoard(boardPath)
     startState = play_makeStarterState(app, readBoard)
     app.statesList.append(startState)
     app.currentStateIndex = 0
+    #make global the solution to board. won't ever change, but needs to be acessed by all instances
+    global solutionBoard
+    solutionBoard = getSolution(startState)
+    print2dList(solutionBoard.board)
 
+def getSolution(state):
+    zeroCount = getZeroCount(state.board)
+    return solver(state, zeroCount)
+
+def solver(state, zeroCount):
+    #print(zeroCount)
+    if zeroCount == 0:
+        return state
+    else:
+        LeastLegalsCell = getLeastLegalsCell(state.legals)
+        if LeastLegalsCell == None:
+            return None
+        row, col = LeastLegalsCell
+        for value in state.legals[row][col]:
+            newState = state.set(row,col, value)
+            solution = solver(newState, zeroCount - 1)
+            if solution != None:
+                return solution
+            #undo is implict
+        return None
+
+def getLeastLegalsCell(legals):
+    LeastLegalsCell = None
+    smallestLen = 10
+    rows, cols = len(legals), len(legals[0])
+    for row in range(rows):
+        for col in range(cols):
+            lenCellLegals = len(legals[row][col])
+            if (lenCellLegals > 0) and (lenCellLegals < smallestLen):
+                LeastLegalsCell = (row, col)
+                smallestLen = lenCellLegals
+    return LeastLegalsCell
+
+#copied from Conrad's solve MiniSudoku: https://cs3-112-f22.academy.cs.cmu.edu/exercise/4823
+def getZeroCount(board):
+    rows, cols = len(board), len(board[0])
+    zeroCount = 0
+    for row in range(rows):
+        for col in range(cols):
+            if board[row][col] == 0: zeroCount += 1
+    return zeroCount
 
 def play_readFile(path):
     with open(path, "rt") as f:
@@ -253,7 +229,6 @@ def play_readBoard(boardPath):
             cellValue = int(cellValue)
             rowList.append(cellValue)
         readBoard.append(rowList)
-    print2dList(readBoard)
     return readBoard
 
 def play_makeStarterState(app, readBoard):
@@ -471,7 +446,7 @@ def help_redrawAll(app):
     drawLabel('GOOD LUCK', 200, 340, size = 20, bold = True)
     drawLabel('HAVE FUN', 200, 360, size = 20, bold = True)
 
-##state debug printing
+##debug printing
 def repr2dList(L):
     if (L == []): return '[]'
     output = [ ]
