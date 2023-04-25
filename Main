@@ -290,16 +290,16 @@ def play_onMouseMove(app, mouseX, mouseY):
     if selectedCell == None:
         app.selection = None
     else:
-        row, col = selectedCell
         app.selection = selectedCell
     
 def play_onKeyPress(app, key):
     if app.number != None:
         row, col = app.number
         if key.isdigit() and key != '0':
+            value = int(key)
             app.statesList = app.statesList[:app.currentStateIndex+1] #remove all the redo boards
             currentState = app.statesList[app.currentStateIndex]
-            newState = currentState.set(row, col, key)
+            newState = currentState.set(row, col, value)
             app.statesList.append(newState)
             app.currentStateIndex += 1
 
@@ -354,6 +354,13 @@ def play_drawBoard(app):
                             app.boardLeft + (app.boxWidth*col)+app.boxWidth/2, 
                             app.boardTop + (app.boxHeight*row)+app.boxHeight/2,
                                 size = 16)
+                solutionBoard = solutionState.board
+                if board[row][col] != solutionBoard[row][col]:
+                    print(type(board[row][col]))
+                    print(type(solutionBoard[row][col]))
+                    drawCircle(app.boardLeft + (app.boxWidth*col)+app.boxWidth/4, 
+                               app.boardTop + (app.boxHeight*row)+app.boxHeight/4,
+                               5, fill = 'green')
             
 def play_drawBoardBorder(app):
     drawRect(app.boardLeft, app.boardTop, app.boardWidth, app.boardHeight,
