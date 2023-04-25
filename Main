@@ -170,9 +170,6 @@ class State():
 def play_onScreenStart(app):
     app.rows = 9
     app.cols = 9
-    app.wrongRow = []
-    app.wrongCol = []
-    app.wrongCount = -1
     app.boardLeft = 50
     app.boardTop = 50
     app.boardWidth = 700
@@ -623,3 +620,5 @@ def main():
     runAppWithScreens(initialScreen='splash', width=800, height=800)
     
 main()
+    
+    
