@@ -5,6 +5,7 @@ import math
 import os
 import random
 import copy
+import itertools
 
 ######
 #make Allregions list
@@ -122,6 +123,46 @@ class State():
         nextState.board[row][col] = value
         nextState.banLegals(row, col, value)
         return nextState
+    
+    def getHint2(self):
+        for regionType in regions:
+            for region in regionType:
+                for N in range(2, 6):
+                    result = self.applyRule2(region, N)
+                    if result != None:
+                        return result
+        return None
+    
+    def applyRule2(self, region, N):
+        for targetCells in itertools.combinations(region, N):
+            for targetLegals in itertools.combinations(range(1,10), N):
+                if self.valuesAreOnlyLegals(targetCells, targetLegals):
+                    return self.getBansForAllRegions(targetCells, targetLegals)
+                
+    def valuesAreOnlyLegals(self, targetCells, targetLegals):
+        targetLegals = set(targetLegals)
+        for cell in targetCells:
+            (row, col) = cell
+            cellLegals = self.legals[row][col]
+            setDif = cellLegals - targetLegals
+            if setDif == set():
+                return True
+        return False
+    
+    def getBansForAllRegions(self, targetCells, targetLegals):
+        movesList = []
+        for regionType in regions:
+            for region in regionType:
+                region = set(region)
+                targetCells = set(targetCells)
+                if targetCells.intersection(region) == targetCells:
+                    for cell in region:
+                        if cell not in targetCells:
+                            for legal in targetLegals:
+                                (row, col) = cell
+                                move = ('ban', row, col, legal)
+                                movesList.append(move)
+        return movesList
 
 ##################
 # play screen
@@ -331,6 +372,23 @@ def play_onKeyPress(app, key):
             newState = currentState.set(row, col, value)
             app.statesList.append(newState)
             app.currentStateIndex += 1
+    elif key == 'w':
+        #weak hint 2
+        currentState = app.statesList[app.currentStateIndex]
+        moves = currentState.getHint2()
+        print(moves)
+        #high light based on row and col of moves
+
+    elif key == 'W':
+        #Strong hint 2
+        currentState = app.statesList[app.currentStateIndex]
+        moves = currentState.getHint2()
+        print(moves)
+        for move in moves:
+            row = move[1]
+            col = move[2]
+            value = move[3]
+            currentState.banLegals(row, col, value)
 
     elif key == 'h':
         setActiveScreen('help')
