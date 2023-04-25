@@ -1,4 +1,5 @@
 # project partners: Conrad Schaumburg (cschaumb) and Lucy Blazquez (lblazque)
+# project partners: Conrad Schaumburg (cschaumb) and Lucy Blazquez (lblazque)
 
 from cmu_graphics import *
 import math
@@ -132,21 +133,34 @@ class State():
                         return result
         return None
     
+    def containsOnlyEmptyCells(self, targetCells):
+        currBoard = self.board
+        for targetCell in targetCells:
+            (row, col) = targetCell
+            if currBoard[row][col] != 0:
+                return False
+        return True
+    
     def applyRule2(self, region, N):
         for targetCells in itertools.combinations(region, N):
-            for targetLegals in itertools.combinations(range(1,10), N):
-                if self.valuesAreOnlyLegals(targetCells, targetLegals):
-                    return self.getBansForAllRegions(targetCells, targetLegals)
+            if self.containsOnlyEmptyCells(targetCells):
+                for targetLegals in itertools.combinations(range(1,10), N):
+                    if self.valuesAreOnlyLegals(targetCells, targetLegals):
+                        print(type(targetCells))
+                        print(type(targetLegals))
+                        return self.getBansForAllRegions(targetCells, targetLegals)
                 
     def valuesAreOnlyLegals(self, targetCells, targetLegals):
         targetLegals = set(targetLegals)
         for cell in targetCells:
             (row, col) = cell
             cellLegals = self.legals[row][col]
+            print('cellLegals', cellLegals)
+            print('targetLegals', targetLegals)
             setDif = cellLegals - targetLegals
-            if setDif == set():
-                return True
-        return False
+            if setDif != set():
+                return False
+        return True
     
     def getBansForAllRegions(self, targetCells, targetLegals):
         movesList = []
@@ -382,8 +396,13 @@ def play_onKeyPress(app, key):
     elif key == 'W':
         #Strong hint 2
         currentState = app.statesList[app.currentStateIndex]
+        '''
+        targetCells = [(0,0), (0,1)]
+        targetLegals = []
+        currentState.valuesAreOnlyLegals(targetCells, targetLegals)
+        '''
         moves = currentState.getHint2()
-        print(moves)
+        #print(moves)
         for move in moves:
             row = move[1]
             col = move[2]
@@ -414,8 +433,6 @@ def play_drawBoard(app):
                                 size = 40)
                 solutionBoard = solutionState.board
                 if board[row][col] != solutionBoard[row][col]:
-                    print(type(board[row][col]))
-                    print(type(solutionBoard[row][col]))
                     drawCircle(app.boardLeft + (app.boxWidth*col)+app.boxWidth/4, 
                                app.boardTop + (app.boxHeight*row)+app.boxHeight/4,
                                5, fill = 'green')
