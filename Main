@@ -159,9 +159,9 @@ def play_onScreenStart(app):
     app.statesList.append(startState)
     app.currentStateIndex = 0
     #make global the solution to board. won't ever change, but needs to be acessed by all instances
-    global solutionBoard
-    solutionBoard = getSolution(startState)
-    print2dList(solutionBoard.board)
+    global solutionState
+    solutionState = getSolution(startState)
+    print2dList(solutionState.board)
 
 def getSolution(state):
     zeroCount = getZeroCount(state.board)
