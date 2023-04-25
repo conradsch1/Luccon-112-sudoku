@@ -107,7 +107,6 @@ class State():
         blockRegion = State.getBlockRegion(block)
         return (rowRegion, colRegion, blockRegion)
 
-
     #https://www.geeksforgeeks.org/python-remove-discard-sets/ for .discard()
     def banLegals(self, row, col, value):
         # mutates self.legals
@@ -171,10 +170,13 @@ class State():
 def play_onScreenStart(app):
     app.rows = 9
     app.cols = 9
+    app.wrongRow = []
+    app.wrongCol = []
+    app.wrongCount = -1
     app.boardLeft = 50
     app.boardTop = 50
-    app.boardWidth = 300
-    app.boardHeight = 300
+    app.boardWidth = 700
+    app.boardHeight = 700
     app.boxWidth = app.boardWidth/app.cols
     app.boxHeight = app.boardHeight/app.rows
     app.currentStateIndex = None
@@ -243,7 +245,8 @@ def getZeroCount(board):
     zeroCount = 0
     for row in range(rows):
         for col in range(cols):
-            if board[row][col] == 0: zeroCount += 1
+            if board[row][col] == 0: 
+                zeroCount += 1
     return zeroCount
 
 def play_readFile(path):
@@ -256,7 +259,7 @@ def play_makeinitialLegals(app):
         rowList = [set(range(1,10)) for col in range(app.cols)]
         initialLegals.append(rowList)
     return initialLegals
-    
+
 def play_drawLegals(app):
     currState = app.statesList[app.currentStateIndex]
     currLegals = currState.legals
@@ -267,23 +270,23 @@ def play_drawLegals(app):
             if currLegalsSet != set():
                 for num in currLegalsSet:
                     if num == 1:
-                        drawLabel('1', 50 + row*33 + 9, 50 + col*33 + 9, size = 13)
+                        drawLabel('1', 50 + row*78 + 15, 50 + col*78 + 15, size = 18)
                     elif num == 2:
-                        drawLabel('2', 50 + row*33 + 18, 50 + col*33 + 9, size = 13)
+                        drawLabel('2', 50 + row*78 + 40, 50 + col*78 + 15, size = 18)
                     elif num == 3:
-                        drawLabel('3', 50 + row*33 + 27, 50 + col*33 + 9, size = 13)
+                        drawLabel('3', 50 + row*78 + 65, 50 + col*78 + 15, size = 18)
                     elif num == 4:
-                        drawLabel('4', 50 + row*33 + 9, 50 + col*33 + 18, size = 13)
+                        drawLabel('4', 50 + row*78 + 15, 50 + col*78 + 40, size = 18)
                     elif num == 5:
-                        drawLabel('5', 50 + row*33 + 18, 50 + col*33 + 18, size = 13)
+                        drawLabel('5', 50 + row*78 + 40, 50 + col*78 + 40, size = 18)
                     elif num == 6:
-                        drawLabel('6', 50 + row*33 + 27, 50 + col*33 + 18, size = 13)
+                        drawLabel('6', 50 + row*78 + 65, 50 + col*78 + 40, size = 18)
                     elif num == 7:
-                        drawLabel('7', 50 + row*33 + 9, 50 + col*33 + 27, size = 13)
+                        drawLabel('7', 50 + row*78 + 15, 50 + col*78 + 65, size = 18)
                     elif num == 8:
-                        drawLabel('8', 50 + row*33 + 18, 50 + col*33 + 27, size = 13)
+                        drawLabel('8', 50 + row*78 + 40, 50 + col*78 + 65, size = 18)
                     elif num == 9:
-                        drawLabel('9', 50 + row*33 + 27, 50 + col*33 + 27, size = 13)
+                        drawLabel('9', 50 + row*78 + 65, 50 + col*78 + 65, size = 18)
 
 def play_makeEmptyState(app):
     initialBoard = [[None] * app.cols for row in range(app.rows)]
@@ -411,7 +414,7 @@ def play_drawBoard(app):
                 drawLabel(board[row][col], 
                             app.boardLeft + (app.boxWidth*col)+app.boxWidth/2, 
                             app.boardTop + (app.boxHeight*row)+app.boxHeight/2,
-                                size = 16)
+                                size = 40)
                 solutionBoard = solutionState.board
                 if board[row][col] != solutionBoard[row][col]:
                     print(type(board[row][col]))
@@ -482,10 +485,10 @@ def play_getCellSize(app):
 
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
+    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
+                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
@@ -506,29 +509,33 @@ def play_loadRandomBoard(filters=None):
 ##################
 def splash_onAppStart(app):
     app.color = 'hotPink'
+    app.label = 'Sudoku'
+    app.labelSize = 120
+    app.labelMoving = True
+
 
 def splash_redrawAll(app):
-    drawRect(0, 0, 400, 400, fill = 'pink')
-    drawLine(20, 20, 380, 20, lineWidth = 3, fill = app.color)
-    drawLine(40, 40, 360, 40, lineWidth = 3, dashes = True)
-    drawLine(20, 20, 20, 380, lineWidth = 3, fill = app.color)
-    drawLine(40, 40, 40, 360, lineWidth = 3, dashes = True)
-    drawLine(20, 380, 380, 380, lineWidth = 3, fill = app.color)
-    drawLine(40, 360, 360, 360, lineWidth = 3, dashes = True)
-    drawLine(380, 20, 380, 380, lineWidth = 3, fill = app.color)
-    drawLine(360, 40, 360, 360, lineWidth = 3, dashes = True)
+    drawRect(0, 0, 800, 800, fill = 'pink')
+    drawLine(20, 20, 780, 20, lineWidth = 3, fill = app.color)
+    drawLine(40, 40, 760, 40, lineWidth = 3, dashes = True)
+    drawLine(20, 20, 20, 780, lineWidth = 3, fill = app.color)
+    drawLine(40, 40, 40, 760, lineWidth = 3, dashes = True)
+    drawLine(20, 780, 780, 780, lineWidth = 3, fill = app.color)
+    drawLine(40, 760, 760, 760, lineWidth = 3, dashes = True)
+    drawLine(780, 20, 780, 780, lineWidth = 3, fill = app.color)
+    drawLine(760, 40, 760, 760, lineWidth = 3, dashes = True)
     drawCircle(20, 20, 5, fill = app.color)
-    drawCircle(380, 20, 5, fill = app.color)
-    drawCircle(20, 380, 5, fill = app.color)
-    drawCircle(380, 380, 5, fill = app.color)
+    drawCircle(780, 20, 5, fill = app.color)
+    drawCircle(20, 780, 5, fill = app.color)
+    drawCircle(780, 780, 5, fill = app.color)
 
-    drawLabel('Sudoku', 200, 160, bold = True, size = 75, fill = 'black')
-    drawLabel('Sudoku', 200, 160, bold = True, size = 67.5, fill = 'hotPink')
-    drawLabel('Sudoku', 200, 160, bold = True, size = 60, fill = 'white')
-    drawLabel("Let's play", 200, 100, bold = True, size = 30)
-    drawLabel("Press 'p' to start playing Sudoku", 200, 230, size = 18, bold = True, fill = 'hotPink')
-    drawLabel("Press 'h' for instructions", 200, 260, size = 18, bold = True, fill = 'white')
-    drawLabel('HAVE FUN', 200, 310, size = 40, bold = True, fill = 'hotPink')
+    drawLabel(app.label, 400, 320, bold = True, size = app.labelSize, fill = 'black')
+    drawLabel(app.label, 400, 320, bold = True, size = app.labelSize - 15, fill = 'hotPink')
+    drawLabel(app.label, 400, 320, bold = True, size = app.labelSize - 30, fill = 'white')
+    drawLabel("Let's play", 400, 200, bold = True, size = 60)
+    drawLabel("Press 'p' to start playing Sudoku", 400, 460, size = 36, bold = True, fill = 'hotPink')
+    drawLabel("Press 'h' for instructions", 400, 520, size = 36, bold = True, fill = 'white')
+    drawLabel('HAVE FUN', 400, 620, size = 80, bold = True, fill = 'hotPink')
 
 def splash_onKeyPress(app, key):
     #add direction to splash screen
@@ -538,6 +545,12 @@ def splash_onKeyPress(app, key):
     elif key == 'h':
         setActiveScreen('help')
         
+def splash_onStep(app):
+    if app.labelMoving:
+        if app.labelSize <= 210:
+            app.labelSize += 3
+        elif app.labelSize >= 210 and app.labelSize > 120:
+            app.labelSize -= .1
 
 #######################
 #help screen
@@ -548,25 +561,36 @@ def help_onScreenStart(app):
 def help_onKeyPress(app, key):
     # add to screen
     if key == 'p':
-        setActiveScreen('help')
+        setActiveScreen('play')
 
 def help_redrawAll(app):
-    drawRect(0, 0, 400, 400, fill = app.color)
-    drawRect(6, 6, 388, 388, fill = None, border = 'black', borderWidth = 6)
-    drawRect(120, 30, 160, 40, fill = 'lightPink')
-    drawRect(120, 30, 160, 40, fill = None, border = 'black')
-    drawLabel('Instructions', 200, 50, bold = True, size = 20)
-    drawLabel("Notice how there exists 3 'regions':", 200, 110, size = 16, bold = True)
-    drawLabel(' - 9 rows (horizontal)', 200, 140, size = 16, bold = True)
-    drawLabel(' - 9 columns (vertical)', 200, 160, size = 16, bold = True)
-    drawLabel(' - 9 regions (denoted by the bolded blocks)', 200, 180, size = 16, bold = True)
-    drawLine(65, 120, 335, 120)
-    drawLabel('Each region must contain digits 1-9 exactly once', 200, 220, size = 16, bold = True, fill = 'white')  
-    drawLabel("Hint: Each cell displays numbers called 'legals'", 200, 250, size = 16, bold = True)
-    drawLabel(' * legals are numbers that can occupy that cell', 200, 270, size = 16, bold = True)  
-    drawLabel('Use logic to determine which numbers go where!', 200, 300, size = 16, bold = True, fill = 'white')
-    drawLabel('GOOD LUCK', 200, 340, size = 20, bold = True)
-    drawLabel('HAVE FUN', 200, 360, size = 20, bold = True)
+    drawRect(0, 0, 800, 800, fill = app.color)
+    drawRect(12, 12, 776, 776, fill = None, border = 'black', borderWidth = 6)
+    drawRect(240, 60, 320, 80, fill = 'lightPink')
+    drawRect(240, 60, 320, 80, fill = None, border = 'black')
+    drawLabel('Instructions', 400, 100, bold = True, size = 45, font = 'cursive')
+    drawLabel("Notice how there exists 3 'regions':", 400, 200, size = 28, bold = True)
+    drawLabel(' - 9 rows (horizontal)', 360, 250, size = 26, bold = True)
+    drawLine(500, 245, 590, 245)
+    drawLine(500, 255, 590, 255)
+    for i in range(10):
+        drawLine(500 + i*10, 245, 500 + i*10, 255)
+    drawLabel(' - 9 columns (vertical)', 390, 310, size = 26, bold = True)
+    drawLine(540, 260, 540, 350)
+    drawLine(550, 260, 550, 350)
+    for i in range(10):
+        drawLine(540, 260 + i*10, 550, 260 + i*10)
+    drawLabel(' - 9 regions', 370, 360, size = 26, bold = True)
+    for i in range(4):
+        drawLine(470, 345 + i*10, 500, 345 + i*10)
+        drawLine(470 + i*10, 345, 470+ i*10, 375)
+    drawRect(470, 345, 30, 30, fill = None, borderWidth = 1.5, border = 'black')
+    drawLine(150, 220, 670, 220)
+    drawLabel(f'Each region must contain each digit from 1-9 exactly once !!', 400, 410, size = 25, bold = True, fill = 'white')  
+    drawLabel("There are many hints to help you if you are stuck!", 400, 450, size = 28, bold = True)
+    drawLine(50, 470, 750, 470)
+    drawLabel('GOOD LUCK', 400, 680, size = 40, bold = True)
+    drawLabel('HAVE FUN', 400, 720, size = 40, bold = True)
 
 ##debug printing
 def repr2dList(L):
@@ -596,6 +620,6 @@ def print2dList(L):
     print(repr2dList(L))
 
 def main():
-    runAppWithScreens(initialScreen='splash', width=600, height=600)
+    runAppWithScreens(initialScreen='splash', width=800, height=800)
     
 main()
