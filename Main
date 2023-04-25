@@ -215,6 +215,35 @@ def play_makeinitialLegals(app):
         rowList = [set(range(1,10)) for col in range(app.cols)]
         initialLegals.append(rowList)
     return initialLegals
+    
+def play_drawLegals(app):
+    currState = app.statesList[app.currentStateIndex]
+    currLegals = currState.legals
+    rows, cols = len(currLegals), len(currLegals[0])
+    for row in range(rows):
+        for col in range(cols):
+            currLegalsSet = currLegals[col][row]
+            if currLegalsSet != set():
+                for num in currLegalsSet:
+                    if num == 1:
+                        drawLabel('1', 50 + row*33 + 9, 50 + col*33 + 9, size = 13)
+                    elif num == 2:
+                        drawLabel('2', 50 + row*33 + 18, 50 + col*33 + 9, size = 13)
+                    elif num == 3:
+                        drawLabel('3', 50 + row*33 + 27, 50 + col*33 + 9, size = 13)
+                    elif num == 4:
+                        drawLabel('4', 50 + row*33 + 9, 50 + col*33 + 18, size = 13)
+                    elif num == 5:
+                        drawLabel('5', 50 + row*33 + 18, 50 + col*33 + 18, size = 13)
+                    elif num == 6:
+                        drawLabel('6', 50 + row*33 + 27, 50 + col*33 + 18, size = 13)
+                    elif num == 7:
+                        drawLabel('7', 50 + row*33 + 9, 50 + col*33 + 27, size = 13)
+                    elif num == 8:
+                        drawLabel('8', 50 + row*33 + 18, 50 + col*33 + 27, size = 13)
+                    elif num == 9:
+                        drawLabel('9', 50 + row*33 + 27, 50 + col*33 + 27, size = 13)
+
 
 def play_drawLegals(app):
     rows, cols = app.rows, app.cols
