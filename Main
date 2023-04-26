@@ -1,5 +1,4 @@
 # project partners: Conrad Schaumburg (cschaumb) and Lucy Blazquez (lblazque)
-# project partners: Conrad Schaumburg (cschaumb) and Lucy Blazquez (lblazque)
 
 from cmu_graphics import *
 import math
@@ -194,6 +193,8 @@ def play_onScreenStart(app):
     #app.initialBoard = None
     app.statesList = []
     app.showLegals = False
+    app.single = None
+    app.showSingle = False
 
     app.cellBorderWidth = 1
 
@@ -325,12 +326,13 @@ def play_makeStarterState(app, readBoard):
             currentState = nextState
     return currentState
     
-def play_getNakedSingle(legals):
+def play_getNakedSingle(app, legals):
     rows, cols = len(legals), len(legals[0])
     for row in range(rows):
         for col in range(cols):
             cellLegalsLen = len(legals[row][col])
             if cellLegalsLen == 1:
+                app.single = (row, col)
                 return row, col
 
 def play_onMousePress(app, mouseX, mouseY):
@@ -373,13 +375,15 @@ def play_onKeyPress(app, key):
     elif key == 'q':
         # weak hint 1
         currentState = app.statesList[app.currentStateIndex]
-        targetCell = play_getNakedSingle(currentState.legals)
+        targetCell = play_getNakedSingle(app, currentState.legals)
+        app.showSingle = not app.showSingle
         #consider the case that targetCell = NOne
         #DO highlight of targetCell
     elif key == 'Q':
         #strong hint 1
         currentState = app.statesList[app.currentStateIndex]
-        targetCell = play_getNakedSingle(currentState.legals)
+        targetCell = play_getNakedSingle(app, currentState.legals)
+        app.showSingle = False
         if targetCell != None:
             row, col = targetCell
             value = currentState.legals[row][col].pop()
@@ -454,6 +458,8 @@ def play_drawCell(app, row, col):
         color = 'pink'
     elif (row, col) == app.number:
         color = 'red'
+    elif app.single != None and (row, col) == app.single and app.showSingle == True:
+        color = 'cyan'
     
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
             fill = color, border = 'black',
@@ -554,8 +560,8 @@ def splash_redrawAll(app):
 def splash_onKeyPress(app, key):
     #add direction to splash screen
     if key == 'p':
-        play_onScreenStart(app)
         setActiveScreen('play')
+        play_onScreenStart(app)
     elif key == 'h':
         setActiveScreen('help')
         
@@ -576,6 +582,9 @@ def help_onKeyPress(app, key):
     # add to screen
     if key == 'p':
         setActiveScreen('play')
+        play_onScreenStart(app)
+    if key == 's':
+        setActiveScreen('splash')
 
 def help_redrawAll(app):
     drawRect(0, 0, 800, 800, fill = app.color)
@@ -603,8 +612,14 @@ def help_redrawAll(app):
     drawLabel(f'Each region must contain each digit from 1-9 exactly once !!', 400, 410, size = 25, bold = True, fill = 'white')  
     drawLabel("There are many hints to help you if you are stuck!", 400, 450, size = 28, bold = True)
     drawLine(50, 470, 750, 470)
-    drawLabel('GOOD LUCK', 400, 680, size = 40, bold = True)
-    drawLabel('HAVE FUN', 400, 720, size = 40, bold = True)
+    drawLabel('**legals are numbers that can occupy the given cell**', 400, 490, size = 25, bold = True, fill = 'white', font = 'cursive')
+    drawLabel("press 'l' to show the legals for each cell", 400, 520, size = 25, bold = True)
+    drawLabel("press 'q' to highlight a cell that can hold only one value", 400, 550, size = 25, bold = True)
+    drawLabel("press 'Q' to fill in the cell that can hold only one value", 400, 580, size = 25, bold = True)
+    drawLabel("press 'w' to ", 400, 610, size = 25, bold = True)
+    drawLabel("press 'W' to ", 400, 640, size = 25, bold = True)
+    drawLabel("press 'u' to undo a move", 400, 670, size = 25, bold = True)
+    drawLabel("press 'r' to redo a move previously undid", 400, 700, size = 25, bold = True)
 
 ##debug printing
 def repr2dList(L):
@@ -637,5 +652,6 @@ def main():
     runAppWithScreens(initialScreen='splash', width=800, height=800)
     
 main()
+    
     
     
