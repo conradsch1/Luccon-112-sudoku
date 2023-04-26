@@ -208,6 +208,17 @@ def play_onScreenStart(app):
                                      easy, medium, hard, expert, evil''')
     if difficulty == '': 
         difficulty = None
+    elif difficulty == 'easy':
+        app.stars = 1
+    elif difficulty == 'medium':
+        app.stars = 2
+    elif difficulty == 'hard':
+        app.stars = 3
+    elif difficulty == 'expert':
+        app.stars = 4
+    elif difficulty == 'evil':
+        app.stars = 5
+        
     boardPath = play_loadRandomBoard(difficulty)
     print(boardPath)
     #for testing
@@ -220,6 +231,8 @@ def play_onScreenStart(app):
     global solutionState
     solutionState = getSolution(startState)
     print2dList(solutionState.board)
+    
+    app.gameOver = False
 
 def getSolution(state):
     zeroCount = getZeroCount(state.board)
@@ -354,84 +367,97 @@ def play_onMouseMove(app, mouseX, mouseY):
     else:
         app.selection = selectedCell
     
+def play_isGameOver(app):
+    currState = app.statesList[app.currentStateIndex]
+    if currState.board == solutionState.board:
+        return True
+    else: return False
+    
+#change this whole thing   
 def play_onKeyPress(app, key):
-    if app.number != None:
-        row, col = app.number
-        if key.isdigit() and key != '0':
-            value = int(key)
-            app.statesList = app.statesList[:app.currentStateIndex+1] #remove all the redo boards
+    if play_isGameOver(app) == False:
+        if app.number != None:
+            row, col = app.number
+            if (key.isdigit() and key != '0'):
+                value = int(key)
+                app.statesList = app.statesList[:app.currentStateIndex+1] #remove all the redo boards
+                currentState = app.statesList[app.currentStateIndex]
+                newState = currentState.set(row, col, value)
+                app.statesList.append(newState)
+                app.currentStateIndex += 1
+
+        if key == 'l':
+            app.showLegals = not app.showLegals
+
+        if key == 'u':
+            app.currentStateIndex -= 1
+            if app.currentStateIndex < 0:
+                app.currentStateIndex = 0
+        elif key == 'r':
+            app.currentStateIndex += 1
+            if app.currentStateIndex >= len(app.statesList):
+                app.currentStateIndex = len(app.statesList) - 1
+
+        elif key == 'q':
+            # weak hint 1
             currentState = app.statesList[app.currentStateIndex]
-            newState = currentState.set(row, col, value)
-            app.statesList.append(newState)
-            app.currentStateIndex += 1
+            targetCell = play_getNakedSingle(app, currentState.legals)
 
-    if key == 'l':
-        app.showLegals = not app.showLegals
+        elif key == 'Q':
+            #strong hint 1
+            currentState = app.statesList[app.currentStateIndex]
+            targetCell = play_getNakedSingle(app, currentState.legals)
+            if targetCell != None:
+                row, col = targetCell
+                value = currentState.legals[row][col].pop()
+                newState = currentState.set(row, col, value)
+                app.statesList.append(newState)
+                app.currentStateIndex += 1
 
-    if key == 'u':
-        app.currentStateIndex -= 1
-        if app.currentStateIndex < 0:
-            app.currentStateIndex = 0
-    elif key == 'r':
-        app.currentStateIndex += 1
-        if app.currentStateIndex >= len(app.statesList):
-            app.currentStateIndex = len(app.statesList) - 1
+        elif key == 'w':
+            #weak hint 2
+            currentState = app.statesList[app.currentStateIndex]
+            moves = currentState.getHint2()
+            #high light based on row and col of moves
 
-    elif key == 'q':
-        # weak hint 1
-        currentState = app.statesList[app.currentStateIndex]
-        targetCell = play_getNakedSingle(app, currentState.legals)
-        app.showSingle = not app.showSingle
-        #consider the case that targetCell = NOne
-        #DO highlight of targetCell
-    elif key == 'Q':
-        #strong hint 1
-        currentState = app.statesList[app.currentStateIndex]
-        targetCell = play_getNakedSingle(app, currentState.legals)
-        app.showSingle = False
-        if targetCell != None:
-            row, col = targetCell
-            value = currentState.legals[row][col].pop()
-            newState = currentState.set(row, col, value)
-            app.statesList.append(newState)
-            app.currentStateIndex += 1
-    elif key == 'w':
-        #weak hint 2
-        currentState = app.statesList[app.currentStateIndex]
-        moves = currentState.getHint2()
-        if moves != None:
-            # do hightlight
-            pass
-        else:
-            #maybe say no hint aviable 
-            pass
-
-    elif key == 'W':
-        #Strong hint 2
-        currentState = app.statesList[app.currentStateIndex]
-        moves = currentState.getHint2()
-        if moves != None:
+        elif key == 'W':
+            #Strong hint 2
+            currentState = app.statesList[app.currentStateIndex]
+            '''
+            targetCells = [(0,0), (0,1)]
+            targetLegals = []
+            currentState.valuesAreOnlyLegals(targetCells, targetLegals)
+            '''
+            moves = currentState.getHint2()
+            #print(moves)
             for move in moves:
-                print(move)
                 row = move[1]
                 col = move[2]
                 value = move[3]
-                currentState.banSingleLegal(row, col, value)
-        else:
-            #there are no moves to be made. maybe say so on board?
-            pass
+                currentState.banLegals(row, col, value)
 
-    elif key == 'h':
-        setActiveScreen('help')
-    elif key == 's':
-        setActiveScreen('splash')
-            
+        elif key == 'h':
+            setActiveScreen('help')
+        elif key == 's':
+            setActiveScreen('splash')
+    #changed this
+    #all setting of values of has happend, so now check game over
+    else:
+        app.gameOver = True
+    
+    if key == 'p':
+        setActiveScreen('play')
+        play_onScreenStart(app)
+
+
+#changed this        
 def play_redrawAll(app):
     play_drawBoard(app)
     play_drawBoardBorder(app)
     play_drawLines(app)
     if app.showLegals == True:
         play_drawLegals(app)
+    play_drawGameOver(app)
     
 def play_drawBoard(app):
     for row in range(app.rows):
@@ -510,13 +536,13 @@ def play_getCellSize(app):
     cellWidth = app.boardWidth / app.cols
     cellHeight = app.boardHeight / app.rows
     return (cellWidth, cellHeight)
-
+    
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
+    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
+                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
@@ -531,6 +557,17 @@ def play_loadRandomBoard(filters=None):
     boardPathsList = play_loadBoardPaths(filters)
     board = random.choice(boardPathsList)
     return board
+    
+def play_drawGameOver(app):
+    if app.gameOver == True:
+        drawRect(90, 350, 620, 100, fill = 'white', border = 'black', borderWidth = 5)
+        drawLabel('CONGRATS! YOU WON!', 400, 400, size = 50, bold = True, fill = 'hotPink')
+        drawRect(200, 470, 400, 60, fill = 'white', border = 'black', borderWidth = 5)
+        drawLabel("Press 'p' to play again!", 400, 500, size = 30, bold = True, fill = 'black')
+        for i in range(app.stars):
+            drawStar(210 + i*100, 280, 50, 5, fill = 'yellow', border = 'black', borderWidth = 5, opacity = 100, rotateAngle = 0, align = 'center', visible = True)
+        for i in range(app.stars, 6 - app.stars):
+            drawStar(210 + i*100, 280, 50, 5, fill = None, border = 'black', borderWidth = 5, opacity = 100, rotateAngle = 0, align = 'center', visible = True)
 
 ##################
 #splash screen
