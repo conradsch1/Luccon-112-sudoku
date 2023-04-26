@@ -108,8 +108,9 @@ class State():
         return (rowRegion, colRegion, blockRegion)
 
     #https://www.geeksforgeeks.org/python-remove-discard-sets/ for .discard()
-    def banLegals(self, row, col, value):
+    def banLegalsAfterSet(self, row, col, value):
         # mutates self.legals
+        #For banning appropiate legals after setting a value
         cellRegions = State.getCellRegions(row, col)
         if value != 0: #seting cell to empty doesn't change legas
             self.legals[row][col] = set() #if a cell is filled it should have no legals
@@ -120,7 +121,7 @@ class State():
     def set(self, row, col, value):
         nextState = copy.deepcopy(self)
         nextState.board[row][col] = value
-        nextState.banLegals(row, col, value)
+        nextState.banLegalsAfterSet(row, col, value)
         return nextState
     
     def getHint2(self):
@@ -128,7 +129,7 @@ class State():
             for region in regionType:
                 for N in range(2, 6):
                     result = self.applyRule2(region, N)
-                    if result != None:
+                    if result != None and result != []: #check if pattern applys and there resultant moves
                         return result
         return None
     
@@ -145,8 +146,6 @@ class State():
             if self.containsOnlyEmptyCells(targetCells):
                 for targetLegals in itertools.combinations(range(1,10), N):
                     if self.valuesAreOnlyLegals(targetCells, targetLegals):
-                        print(type(targetCells))
-                        print(type(targetLegals))
                         return self.getBansForAllRegions(targetCells, targetLegals)
                 
     def valuesAreOnlyLegals(self, targetCells, targetLegals):
@@ -154,8 +153,6 @@ class State():
         for cell in targetCells:
             (row, col) = cell
             cellLegals = self.legals[row][col]
-            print('cellLegals', cellLegals)
-            print('targetLegals', targetLegals)
             setDif = cellLegals - targetLegals
             if setDif != set():
                 return False
@@ -172,9 +169,16 @@ class State():
                         if cell not in targetCells:
                             for legal in targetLegals:
                                 (row, col) = cell
-                                move = ('ban', row, col, legal)
-                                movesList.append(move)
+                                cellLegals = self.legals[row][col]
+                                if legal in cellLegals:
+                                    move = ('ban', row, col, legal)
+                                    movesList.append(move)
         return movesList
+    
+    def banSingleLegal(self, row, col, value):
+        #For banning single legal as in a move given by hint 2
+        self.legals[row][col].discard(value)
+
 
 ##################
 # play screen
@@ -190,7 +194,6 @@ def play_onScreenStart(app):
     app.boxWidth = app.boardWidth/app.cols
     app.boxHeight = app.boardHeight/app.rows
     app.currentStateIndex = None
-    #app.initialBoard = None
     app.statesList = []
     app.showLegals = False
     app.single = None
@@ -206,7 +209,7 @@ def play_onScreenStart(app):
     if difficulty == '': 
         difficulty = None
     boardPath = play_loadRandomBoard(difficulty)
-    #print(boardPath)
+    print(boardPath)
     #for testing
     #boardPath = "C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/easy-01.png.txt"
     readBoard = play_readBoard(boardPath)
@@ -299,6 +302,8 @@ def play_drawLegals(app):
                         drawLabel('8', 50 + row*78 + 40, 50 + col*78 + 65, size = 18)
                     elif num == 9:
                         drawLabel('9', 50 + row*78 + 65, 50 + col*78 + 65, size = 18)
+
+    
 
 def play_makeEmptyState(app):
     initialBoard = [[None] * app.cols for row in range(app.rows)]
@@ -394,24 +399,27 @@ def play_onKeyPress(app, key):
         #weak hint 2
         currentState = app.statesList[app.currentStateIndex]
         moves = currentState.getHint2()
-        print(moves)
-        #high light based on row and col of moves
+        if moves != None:
+            # do hightlight
+            pass
+        else:
+            #maybe say no hint aviable 
+            pass
 
     elif key == 'W':
         #Strong hint 2
         currentState = app.statesList[app.currentStateIndex]
-        '''
-        targetCells = [(0,0), (0,1)]
-        targetLegals = []
-        currentState.valuesAreOnlyLegals(targetCells, targetLegals)
-        '''
         moves = currentState.getHint2()
-        #print(moves)
-        for move in moves:
-            row = move[1]
-            col = move[2]
-            value = move[3]
-            currentState.banLegals(row, col, value)
+        if moves != None:
+            for move in moves:
+                print(move)
+                row = move[1]
+                col = move[2]
+                value = move[3]
+                currentState.banSingleLegal(row, col, value)
+        else:
+            #there are no moves to be made. maybe say so on board?
+            pass
 
     elif key == 'h':
         setActiveScreen('help')
@@ -505,10 +513,10 @@ def play_getCellSize(app):
 
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
+    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
+                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
@@ -649,9 +657,6 @@ def print2dList(L):
     print(repr2dList(L))
 
 def main():
-    runAppWithScreens(initialScreen='splash', width=800, height=800)
+    runAppWithScreens(initialScreen='splash', width=700, height=700)
     
 main()
-    
-    
-    
