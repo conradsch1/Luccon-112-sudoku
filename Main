@@ -350,7 +350,6 @@ def play_getNakedSingle(app, legals):
         for col in range(cols):
             cellLegalsLen = len(legals[row][col])
             if cellLegalsLen == 1:
-                app.single = (row, col)
                 return row, col
 
 def play_onMousePress(app, mouseX, mouseY):
@@ -403,11 +402,13 @@ def play_onKeyPress(app, key):
             # weak hint 1
             currentState = app.statesList[app.currentStateIndex]
             targetCell = play_getNakedSingle(app, currentState.legals)
+            app.single = targetCell
 
         elif key == 'Q':
             #strong hint 1
             currentState = app.statesList[app.currentStateIndex]
             targetCell = play_getNakedSingle(app, currentState.legals)
+            app.single = targetCell
             if targetCell != None:
                 row, col = targetCell
                 value = currentState.legals[row][col].pop()
@@ -439,7 +440,6 @@ def play_onKeyPress(app, key):
             #print(moves)
             if moves != None:
                 for move in moves:
-                    print(move)
                     row = move[1]
                     col = move[2]
                     value = move[3]
@@ -485,7 +485,7 @@ def play_drawBoard(app):
                 if board[row][col] != solutionBoard[row][col]:
                     drawCircle(app.boardLeft + (app.boxWidth*col)+app.boxWidth/4, 
                                app.boardTop + (app.boxHeight*row)+app.boxHeight/4,
-                               5, fill = 'green')
+                               5, fill = 'hotPink', border = 'black')
             
 def play_drawBoardBorder(app):
     drawRect(app.boardLeft, app.boardTop, app.boardWidth, app.boardHeight,
@@ -551,10 +551,10 @@ def play_getCellSize(app):
     
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
+    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
+                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
