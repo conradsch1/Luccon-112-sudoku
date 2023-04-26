@@ -199,6 +199,8 @@ def play_onScreenStart(app):
     app.single = None
     app.showSingle = False
 
+    app.subsetLegals = []
+
     app.cellBorderWidth = 1
 
     app.selection = None
@@ -416,9 +418,14 @@ def play_onKeyPress(app, key):
             #weak hint 2
             currentState = app.statesList[app.currentStateIndex]
             moves = currentState.getHint2()
+            app.subsetLegals = []
             if moves != None:
-                # do hightlight
-                pass
+                result = []
+                for move in moves:
+                    row = move[1]
+                    col = move[2]
+                    result.append((row, col))
+                app.subsetLegals = result
             else:
                 pass
             #highlight based on row and col of moves
@@ -435,11 +442,14 @@ def play_onKeyPress(app, key):
             moves = currentState.getHint2()
             #print(moves)
             if moves != None:
+                result = []
                 for move in moves:
                     row = move[1]
                     col = move[2]
                     value = move[3]
+                    result.append((row, col))
                     currentState.banSingleLegal(row, col, value)
+                app.subsetLegals = result
             else:
                 #there are no moves to be made. maybe say so on board?
                 pass
@@ -512,6 +522,8 @@ def play_drawCell(app, row, col):
         color = 'red'
     elif (row, col) == app.single:
         color = 'cyan'
+    elif (row, col) in app.subsetLegals:
+        color = 'purple'
     
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
             fill = color, border = 'black',
@@ -618,7 +630,7 @@ def splash_redrawAll(app):
     drawLabel(app.label, 400, 320, bold = True, size = app.labelSize, fill = 'black')
     drawLabel(app.label, 400, 320, bold = True, size = app.labelSize - 15, fill = 'hotPink')
     drawLabel(app.label, 400, 320, bold = True, size = app.labelSize - 30, fill = 'white')
-    drawLabel("Let's play", 400, 200, bold = True, size = 60)
+    drawLabel("Let's play", 400, 190, bold = True, size = 60)
     drawLabel("Press 'p' to start playing Sudoku", 400, 460, size = 36, bold = True, fill = 'hotPink')
     drawLabel("Press 'h' for instructions", 400, 520, size = 36, bold = True, fill = 'white')
     drawLabel('HAVE FUN', 400, 620, size = 85, bold = True, fill = 'hotPink')
@@ -658,7 +670,7 @@ def help_redrawAll(app):
     drawLabel("press 'p' to begin playing and press 's' or the left arrow to go back to the home screen", 400, 50, size = 16, fill = 'white', bold = True)
     drawRect(240, 80, 320, 80, fill = 'lightPink')
     drawRect(240, 80, 320, 80, fill = None, border = 'black')
-    drawLabel('Instructions', 400, 120, bold = True, size = 45, font = 'cursive')
+    drawLabel('Instructions', 400, 120, bold = True, size = 48, font = 'cursive')
     drawLabel("Notice how there exists 3 'regions':", 400, 200, size = 28, bold = True)
     drawLabel(' - 9 rows (horizontal)', 360, 250, size = 26, bold = True)
     drawLine(500, 245, 590, 245)
@@ -682,7 +694,7 @@ def help_redrawAll(app):
     drawLabel("press 'l' to show the legals for each cell", 400, 520, size = 25, bold = True)
     drawLabel("press 'q' to highlight a cell that can hold only one value", 400, 550, size = 25, bold = True)
     drawLabel("press 'Q' to fill in the cell that can hold only one value", 400, 580, size = 25, bold = True)
-    #drawLabel("press 'w' to eliminate subsets of digits from cells", 400, 610, size = 25, bold = True)
+    drawLabel("press 'w' to highlight subsets of digits from cells", 400, 610, size = 25, bold = True)
     drawLabel("press 'W' to eliminate subsets of digits from cells", 400, 640, size = 25, bold = True)
     drawLabel("press 'u' to undo a move", 400, 670, size = 25, bold = True)
     drawLabel("press 'r' to redo a move previously undid", 400, 700, size = 25, bold = True)
