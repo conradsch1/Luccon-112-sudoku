@@ -565,10 +565,10 @@ def play_getCellSize(app):
     
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
+    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
+                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
@@ -609,12 +609,16 @@ def splash_redrawAll(app):
     drawRect(0, 0, 800, 800, fill = 'pink')
     drawLine(20, 20, 780, 20, lineWidth = 3, fill = app.color)
     drawLine(40, 40, 760, 40, lineWidth = 3, dashes = True)
+    for i in range(18):
+        drawCircle(60 + i*40, 60, 5, fill = 'white')
     drawLine(20, 20, 20, 780, lineWidth = 3, fill = app.color)
     drawLine(40, 40, 40, 760, lineWidth = 3, dashes = True)
     drawLine(20, 780, 780, 780, lineWidth = 3, fill = app.color)
     drawLine(40, 760, 760, 760, lineWidth = 3, dashes = True)
     drawLine(780, 20, 780, 780, lineWidth = 3, fill = app.color)
     drawLine(760, 40, 760, 760, lineWidth = 3, dashes = True)
+    for i in range(18):
+        drawCircle(60 + i*40, 740, 5, fill = 'white')
     drawCircle(20, 20, 5, fill = app.color)
     drawCircle(780, 20, 5, fill = app.color)
     drawCircle(20, 780, 5, fill = app.color)
@@ -626,7 +630,7 @@ def splash_redrawAll(app):
     drawLabel("Let's play", 400, 200, bold = True, size = 60)
     drawLabel("Press 'p' to start playing Sudoku", 400, 460, size = 36, bold = True, fill = 'hotPink')
     drawLabel("Press 'h' for instructions", 400, 520, size = 36, bold = True, fill = 'white')
-    drawLabel('HAVE FUN', 400, 620, size = 80, bold = True, fill = 'hotPink')
+    drawLabel('HAVE FUN', 400, 620, size = 85, bold = True, fill = 'hotPink')
 
 def splash_onKeyPress(app, key):
     #add direction to splash screen
@@ -654,15 +658,16 @@ def help_onKeyPress(app, key):
     if key == 'p':
         setActiveScreen('play')
         play_onScreenStart(app)
-    if key == 's':
+    if key == 's' or key == 'left':
         setActiveScreen('splash')
 
 def help_redrawAll(app):
     drawRect(0, 0, 800, 800, fill = app.color)
     drawRect(12, 12, 776, 776, fill = None, border = 'black', borderWidth = 6)
-    drawRect(240, 60, 320, 80, fill = 'lightPink')
-    drawRect(240, 60, 320, 80, fill = None, border = 'black')
-    drawLabel('Instructions', 400, 100, bold = True, size = 45, font = 'cursive')
+    drawLabel("press 'p' to begin playing and press 's' or the left arrow to go back to the home screen", 400, 50, size = 16, fill = 'white', bold = True)
+    drawRect(240, 80, 320, 80, fill = 'lightPink')
+    drawRect(240, 80, 320, 80, fill = None, border = 'black')
+    drawLabel('Instructions', 400, 120, bold = True, size = 45, font = 'cursive')
     drawLabel("Notice how there exists 3 'regions':", 400, 200, size = 28, bold = True)
     drawLabel(' - 9 rows (horizontal)', 360, 250, size = 26, bold = True)
     drawLine(500, 245, 590, 245)
@@ -683,14 +688,16 @@ def help_redrawAll(app):
     drawLabel(f'Each region must contain each digit from 1-9 exactly once !!', 400, 410, size = 25, bold = True, fill = 'white')  
     drawLabel("There are many hints to help you if you are stuck!", 400, 450, size = 28, bold = True)
     drawLine(50, 470, 750, 470)
-    drawLabel('**legals are numbers that can occupy the given cell**', 400, 490, size = 25, bold = True, fill = 'white', font = 'cursive')
+    drawLabel('**legals are numbers that can occupy the given cell**', 400, 490, size = 20, bold = True, fill = 'white', font = 'cursive')
     drawLabel("press 'l' to show the legals for each cell", 400, 520, size = 25, bold = True)
     drawLabel("press 'q' to highlight a cell that can hold only one value", 400, 550, size = 25, bold = True)
     drawLabel("press 'Q' to fill in the cell that can hold only one value", 400, 580, size = 25, bold = True)
-    drawLabel("press 'w' to ", 400, 610, size = 25, bold = True)
-    drawLabel("press 'W' to ", 400, 640, size = 25, bold = True)
+    #drawLabel("press 'w' to eliminate subsets of digits from cells", 400, 610, size = 25, bold = True)
+    drawLabel("press 'W' to eliminate subsets of digits from cells", 400, 640, size = 25, bold = True)
     drawLabel("press 'u' to undo a move", 400, 670, size = 25, bold = True)
     drawLabel("press 'r' to redo a move previously undid", 400, 700, size = 25, bold = True)
+    drawLabel("press 'a' to automatically fill in all the singleton cells", 400, 730, size = 25, bold = True)
+    drawLabel("**(singleton cells are cells which may only contain one digit)**", 400, 760, size = 20, fill = 'white', font = 'cursive')
 
 ##debug printing
 def repr2dList(L):
