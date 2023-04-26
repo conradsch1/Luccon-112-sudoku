@@ -374,7 +374,7 @@ def play_isGameOver(app):
     
 #change this whole thing   
 def play_onKeyPress(app, key):
-    if play_isGameOver(app) == False:
+    if app.gameOver == False:
         if app.number != None:
             row, col = app.number
             if (key.isdigit() and key != '0'):
@@ -452,11 +452,25 @@ def play_onKeyPress(app, key):
             setActiveScreen('help')
         elif key == 's':
             setActiveScreen('splash')
+        elif key == 'a':
+            #auto play singltons
+            while True:
+                currentState = app.statesList[app.currentStateIndex]
+                targetCell = play_getNakedSingle(app, currentState.legals)
+                if targetCell == None:
+                    break
+                app.single = targetCell
+                row, col = targetCell
+                value = currentState.legals[row][col].pop()
+                newState = currentState.set(row, col, value)
+                app.statesList.append(newState)
+                app.currentStateIndex += 1
+
     #changed this
     #all setting of values of has happend, so now check game over
-    else:
-        app.gameOver = True
-    
+        if play_isGameOver(app):
+            app.gameOver = True
+
     if key == 'p':
         setActiveScreen('play')
         play_onScreenStart(app)
