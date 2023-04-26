@@ -1,4 +1,5 @@
 # project partners: Conrad Schaumburg (cschaumb) and Lucy Blazquez (lblazque)
+#TicTac toe used as template for drawing board: https://cs3-112-f22.academy.cs.cmu.edu/exercise/4958
 
 from cmu_graphics import *
 import math
@@ -30,7 +31,7 @@ def createAllColRegions(rows, cols):
         colRegions.append(colList)
     return colRegions
 
-#used isLegal sedoku code
+#used Conrad's isLegalSedoku as template: https://cs3-112-f22.academy.cs.cmu.edu/exercise/4745
 def createAllBlockRegions(rows):
     blockRegions = []
     numberOfBlocks = rows
@@ -55,8 +56,6 @@ regions = createAllRegions(9, 9)
 
 ######
 ######
-
-#make initial legals when make initial board and unchanged legals. Then add make new until have initial board. then clear state list
 
 class State():
     def __init__(self, board, legals):
@@ -223,24 +222,23 @@ def play_onScreenStart(app):
         app.stars = 5
         
     boardPath = play_loadRandomBoard(difficulty)
-    #boardPath = "C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/easy-01.png.txt"
     readBoard = play_readBoard(boardPath)
     startState = play_makeStarterState(app, readBoard)
     app.statesList.append(startState)
     app.currentStateIndex = 0
 
-    #make global the solution to board. won't ever change, but needs to be acessed by all instances
+    #make global the solution to board; won't ever change, but needs to be acessed by all instances
     global solutionState
     solutionState = getSolution(startState)
     
     app.gameOver = False
 
+#Conrad's solve MiniSudoku used as template: https://cs3-112-f22.academy.cs.cmu.edu/exercise/4823
 def getSolution(state):
     zeroCount = getZeroCount(state.board)
     return solver(state, zeroCount)
 
 def solver(state, zeroCount):
-    #print(zeroCount)
     if zeroCount == 0:
         return state
     else:
@@ -428,7 +426,6 @@ def play_onKeyPress(app, key):
                 app.subsetLegals = result
             else:
                 pass
-            #highlight based on row and col of moves
 
         elif key == 'W':
             #Strong hint 2
@@ -440,7 +437,6 @@ def play_onKeyPress(app, key):
             currentState.valuesAreOnlyLegals(targetCells, targetLegals)
             '''
             moves = currentState.getHint2()
-            #print(moves)
             if moves != None:
                 result = []
                 for move in moves:
@@ -451,7 +447,6 @@ def play_onKeyPress(app, key):
                     currentState.banSingleLegal(row, col, value)
                 app.subsetLegals = result
             else:
-                #there are no moves to be made. maybe say so on board?
                 pass
 
         elif key == 'h':
@@ -459,7 +454,7 @@ def play_onKeyPress(app, key):
         elif key == 's':
             setActiveScreen('splash')
         elif key == 'a':
-            #auto play singltons
+            #auto play singletons
             while True:
                 currentState = app.statesList[app.currentStateIndex]
                 targetCell = play_getNakedSingle(app, currentState.legals)
@@ -569,10 +564,10 @@ def play_getCellSize(app):
     
 def play_loadBoardPaths(filters):
     boardPaths = [ ]
-    for filename in os.listdir(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards'):
+    for filename in os.listdir(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards'):
         if filename.endswith('.txt'):
             if play_hasFilters(filename, filters):
-                boardPaths.append(f'//Users/lucy/Downloads/cmu_graphics_installer/tp_starter_files/boards/{filename}')
+                boardPaths.append(f'C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/{filename}')
     return boardPaths
 
 def play_hasFilters(filename, filters=None):
@@ -636,7 +631,6 @@ def splash_redrawAll(app):
     drawLabel('HAVE FUN', 400, 620, size = 85, bold = True, fill = 'hotPink')
 
 def splash_onKeyPress(app, key):
-    #add direction to splash screen
     if key == 'p':
         setActiveScreen('play')
         play_onScreenStart(app)
@@ -657,7 +651,6 @@ def help_onScreenStart(app):
     app.color = 'lightPink'
 
 def help_onKeyPress(app, key):
-    # add to screen
     if key == 'p':
         setActiveScreen('play')
         play_onScreenStart(app)
