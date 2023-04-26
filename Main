@@ -59,7 +59,6 @@ regions = createAllRegions(9, 9)
 #make initial legals when make initial board and unchanged legals. Then add make new until have initial board. then clear state list
 
 class State():
-    #since I'm making copyies of state classes does init only run on the first. Does it run when I make a copy
     def __init__(self, board, legals):
         self.board = board
         self.legals = legals
@@ -112,7 +111,7 @@ class State():
         # mutates self.legals
         #For banning appropiate legals after setting a value
         cellRegions = State.getCellRegions(row, col)
-        if value != 0: #seting cell to empty doesn't change legas
+        if value != 0: #setting cell to empty doesn't change legals
             self.legals[row][col] = set() #if a cell is filled it should have no legals
             for region in cellRegions:
                 for (row, col) in region:
@@ -179,7 +178,6 @@ class State():
          #For banning single legal as in a move given by hint 2
          self.legals[row][col].discard(value)
 
-
 ##################
 # play screen
 ###################
@@ -193,8 +191,10 @@ def play_onScreenStart(app):
     app.boardHeight = 700
     app.boxWidth = app.boardWidth/app.cols
     app.boxHeight = app.boardHeight/app.rows
+
     app.currentStateIndex = None
     app.statesList = []
+
     app.showLegals = False
     app.single = None
     app.showSingle = False
@@ -203,7 +203,8 @@ def play_onScreenStart(app):
 
     app.selection = None
     app.number = None
-    #steps for making starterStarte/ first state
+
+    #steps for making starterState/first state
     difficulty = app.getTextInput('''What difficulty do you want? Options:
                                      easy, medium, hard, expert, evil''')
     if difficulty == '': 
@@ -220,17 +221,15 @@ def play_onScreenStart(app):
         app.stars = 5
         
     boardPath = play_loadRandomBoard(difficulty)
-    print(boardPath)
-    #for testing
     #boardPath = "C://Users/conra/Desktop/15-112_TP/tp-starter-files/tp-starter-files/boards/easy-01.png.txt"
     readBoard = play_readBoard(boardPath)
     startState = play_makeStarterState(app, readBoard)
     app.statesList.append(startState)
     app.currentStateIndex = 0
+
     #make global the solution to board. won't ever change, but needs to be acessed by all instances
     global solutionState
     solutionState = getSolution(startState)
-    print2dList(solutionState.board)
     
     app.gameOver = False
 
@@ -316,8 +315,6 @@ def play_drawLegals(app):
                     elif num == 9:
                         drawLabel('9', 50 + row*78 + 65, 50 + col*78 + 65, size = 18)
 
-    
-
 def play_makeEmptyState(app):
     initialBoard = [[None] * app.cols for row in range(app.rows)]
     initialLegals = play_makeinitialLegals(app)
@@ -356,7 +353,7 @@ def play_onMousePress(app, mouseX, mouseY):
     app.selection = None
     cell = play_getCell(app, mouseX, mouseY)
     if cell != None:
-        row, col = cell #why this line
+        row, col = cell 
         app.number = cell
             
 def play_onMouseMove(app, mouseX, mouseY):
@@ -372,7 +369,6 @@ def play_isGameOver(app):
         return True
     else: return False
     
-#change this whole thing   
 def play_onKeyPress(app, key):
     if app.gameOver == False:
         if app.number != None:
@@ -424,13 +420,13 @@ def play_onKeyPress(app, key):
                 # do hightlight
                 pass
             else:
-                #maybe say no hint aviable 
                 pass
-            #high light based on row and col of moves
+            #highlight based on row and col of moves
 
         elif key == 'W':
             #Strong hint 2
             currentState = app.statesList[app.currentStateIndex]
+
             '''
             targetCells = [(0,0), (0,1)]
             targetLegals = []
@@ -466,17 +462,13 @@ def play_onKeyPress(app, key):
                 app.statesList.append(newState)
                 app.currentStateIndex += 1
 
-    #changed this
-    #all setting of values of has happend, so now check game over
         if play_isGameOver(app):
             app.gameOver = True
 
     if key == 'p':
         setActiveScreen('play')
         play_onScreenStart(app)
-
-
-#changed this        
+      
 def play_redrawAll(app):
     play_drawBoard(app)
     play_drawBoardBorder(app)
@@ -592,7 +584,7 @@ def play_drawGameOver(app):
         drawLabel("Press 'p' to play again!", 400, 500, size = 30, bold = True, fill = 'black')
         for i in range(app.stars):
             drawStar(210 + i*100, 280, 50, 5, fill = 'yellow', border = 'black', borderWidth = 5, opacity = 100, rotateAngle = 0, align = 'center', visible = True)
-        for i in range(app.stars, 6 - app.stars):
+        for i in range(app.stars, 5):
             drawStar(210 + i*100, 280, 50, 5, fill = None, border = 'black', borderWidth = 5, opacity = 100, rotateAngle = 0, align = 'center', visible = True)
 
 ##################
@@ -604,20 +596,19 @@ def splash_onAppStart(app):
     app.labelSize = 120
     app.labelMoving = True
 
-
 def splash_redrawAll(app):
     drawRect(0, 0, 800, 800, fill = 'pink')
     drawLine(20, 20, 780, 20, lineWidth = 3, fill = app.color)
     drawLine(40, 40, 760, 40, lineWidth = 3, dashes = True)
-    for i in range(18):
-        drawCircle(60 + i*40, 60, 5, fill = 'white')
     drawLine(20, 20, 20, 780, lineWidth = 3, fill = app.color)
     drawLine(40, 40, 40, 760, lineWidth = 3, dashes = True)
     drawLine(20, 780, 780, 780, lineWidth = 3, fill = app.color)
     drawLine(40, 760, 760, 760, lineWidth = 3, dashes = True)
     drawLine(780, 20, 780, 780, lineWidth = 3, fill = app.color)
     drawLine(760, 40, 760, 760, lineWidth = 3, dashes = True)
+
     for i in range(18):
+        drawCircle(60 + i*40, 60, 5, fill = 'white')
         drawCircle(60 + i*40, 740, 5, fill = 'white')
     drawCircle(20, 20, 5, fill = app.color)
     drawCircle(780, 20, 5, fill = app.color)
@@ -674,11 +665,10 @@ def help_redrawAll(app):
     drawLine(500, 255, 590, 255)
     for i in range(10):
         drawLine(500 + i*10, 245, 500 + i*10, 255)
+        drawLine(540, 260 + i*10, 550, 260 + i*10)
     drawLabel(' - 9 columns (vertical)', 390, 310, size = 26, bold = True)
     drawLine(540, 260, 540, 350)
     drawLine(550, 260, 550, 350)
-    for i in range(10):
-        drawLine(540, 260 + i*10, 550, 260 + i*10)
     drawLabel(' - 9 regions', 370, 360, size = 26, bold = True)
     for i in range(4):
         drawLine(470, 345 + i*10, 500, 345 + i*10)
